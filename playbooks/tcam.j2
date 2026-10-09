@@ -1,0 +1,188 @@
+{% if metadata is defined and metadata.platform is defined %}
+{% if "7020" in metadata.platform %}
+hardware tcam
+  profile SERVICE_PROVIDER_7020
+    feature acl port ip egress disabled
+    feature acl subintf ip
+      key field dscp dst-ip ip-frag ip-protocol l4-dst-port l4-ops-18b l4-src-port src-ip tcp-control ttl
+      action count drop
+      packet ipv4 forwarding routed
+      sequence 40
+      key size limit 160
+    feature evpn mpls irb
+      key size limit 160
+    feature evpn mpls multi-homing
+      key size limit 160
+    feature mpls
+      action drop redirect set-ecn
+      packet ipv4 mpls ipv4 forwarding mpls decap
+      packet ipv4 mpls ipv6 forwarding mpls decap
+      packet mpls ipv4 forwarding mpls
+      packet mpls ipv6 forwarding mpls
+      packet mpls non-ip forwarding mpls
+      sequence 5
+      key size limit 160
+    feature mpls pop ingress
+      sequence 90
+    feature qos mac
+      key field forwarding-type ipv6-traffic-class mpls-traffic-class vlan
+      action set-dscp set-policer set-tc
+      packet ipv6 forwarding bridged
+      packet ipv6 forwarding routed
+      packet mpls forwarding bridged decap
+      packet mpls ipv4 forwarding mpls
+      packet mpls ipv6 forwarding mpls
+      packet mpls non-ip forwarding mpls
+      packet non-ip forwarding bridged
+      key size limit 160
+    feature qos subintf ip
+      key field dscp dst-ip forwarding-type ip-frag ip-protocol l4-dst-port l4-ops-7b l4-src-port src-ip tcp-control vlan
+      action set-dscp set-policer set-tc
+      packet ipv4 forwarding bridged sub-interface
+      packet ipv4 forwarding routed
+      key size limit 160
+    feature traffic-policy cpu ipv4
+      key size limit 160
+      key field dst-ip ip-protocol l4-dst-port l4-src-port src-ip tcp-control
+      action count set-drop-precedence set-policer
+      packet mpls ipv4 forwarding routed decap
+   system profile SERVICE_PROVIDER_7020
+{% endif %}
+{% if "7280SR3" in metadata.platform or "7280DR3" in metadata.platform or "7280CR3" in metadata.platform %}
+hardware tcam
+   profile rsp_12_2024
+      !! changed ttl to hop-limit in traffic-policy cpu ipv6
+      !! requires EOS >= 4.31.1F
+      feature acl port ip egress disabled
+      !
+      feature cfm
+         packet ipv4 forwarding bridged
+         packet ipv6 forwarding bridged
+         packet non-ip forwarding bridged
+      !
+      feature evpn mpls irb
+         sequence 15
+         key size limit 160
+      !
+      feature evpn mpls multi-homing
+         sequence 10
+         key size limit 160
+      !
+      feature interface-policing
+         action count police-group police-interface
+         packet ipv4 forwarding bridged
+         packet ipv4 forwarding routed
+         packet ipv6 forwarding bridged
+         packet ipv6 forwarding routed
+         packet non-ip forwarding bridged
+      !
+      feature l2-protocol forwarding
+         key size limit 160
+         key field dst-mac vlan-tag-format
+         action mirror redirect-to-cpu set-tc
+         packet non-ip forwarding bridged
+      !
+      feature mpls
+         sequence 5
+         key size limit 160
+         action drop redirect set-ecn
+         packet ipv4 mpls ipv4 forwarding mpls decap
+         packet ipv4 mpls ipv6 forwarding mpls decap
+         packet mpls ipv4 forwarding mpls
+         packet mpls ipv6 forwarding mpls
+         packet mpls non-ip forwarding mpls
+      !
+      feature mpls pop ingress
+         sequence 105
+      !
+      feature qos ip
+         sequence 90
+         port qualifier size 5 bits
+         key field cos dscp dst-ip forwarding-type ip-frag ip-protocol l4-dst-port l4-ops-7b l4-src-port src-ip tcp-control vlan vlan-tag-format
+         action count set-dscp set-tc set-unshared-policer
+         packet ipv4 forwarding bridged
+         packet ipv4 forwarding routed
+         packet ipv4 forwarding routed multicast
+         packet ipv4 mpls ipv4 forwarding mpls decap
+         packet ipv4 mpls ipv6 forwarding mpls decap
+         packet ipv4 non-vxlan forwarding routed decap
+         packet ipv4 vxlan forwarding bridged decap
+      !
+      feature qos ipv6
+         port qualifier size 5 bits
+         key field dst-ipv6 ipv6-next-header ipv6-traffic-class l4-dst-port l4-src-port src-ipv6-high src-ipv6-low
+         action count set-dscp set-tc set-unshared-policer
+         packet ipv6 forwarding routed
+      !
+      feature qos mac
+         sequence 75
+         key size limit 160
+         port qualifier size 5 bits
+         key field cos ether-type forwarding-type ipv6-traffic-class mpls-traffic-class vlan vlan-tag-format
+         action count set-dscp set-tc set-unshared-policer
+         packet ipv6 forwarding bridged
+         packet ipv6 forwarding routed
+         packet mpls forwarding bridged decap
+         packet mpls ipv4 forwarding mpls
+         packet mpls ipv6 forwarding mpls
+         packet mpls non-ip forwarding mpls
+         packet non-ip forwarding bridged
+      !
+      feature rfc2544
+         key size limit 160
+         key field dst-mac src-mac
+         action count drop
+         packet ipv4 forwarding bridged
+         packet ipv4 forwarding routed
+         packet non-ip forwarding bridged
+      !
+      feature storm-control subintf
+         packet ipv4 forwarding bridged
+         packet ipv6 forwarding bridged
+         packet non-ip forwarding bridged
+      !
+      feature traffic-policy cpu ipv4
+         key size limit 160
+         port qualifier size 2 bits
+         key field dst-ip ip-frag ip-length ip-protocol l4-dst-port l4-src-port src-ip tcp-control ttl
+         action count set-drop-precedence set-policer
+         packet mpls ipv4 forwarding routed decap
+      !
+      feature traffic-policy cpu ipv6
+         port qualifier size 2 bits
+         key field dst-ipv6 hop-limit ipv6-next-header l4-dst-port l4-src-port src-ipv6-high src-ipv6-low
+         action count set-drop-precedence set-policer
+         packet mpls ipv6 forwarding routed decap
+      !
+      feature traffic-policy port ipv4
+         key field dscp dst-ip-label ip-frag ip-fragment-offset ip-length ip-protocol l4-dst-port l4-src-port src-ip-label tcp-control ttl
+         action count drop mirror
+         packet ipv4 forwarding bridged
+         packet ipv4 forwarding routed
+         packet mpls ipv4 forwarding bridged
+         packet mpls ipv4 forwarding mpls
+      !
+      feature traffic-policy port ipv4 egress
+         key size limit 160
+         key field dscp dst-ip-label ip-frag ip-protocol l4-dst-port l4-src-port src-ip-label tcp-control
+         action count drop mirror
+         packet ipv4 forwarding routed
+         packet mpls ipv4 forwarding mpls
+      !
+      feature traffic-policy port ipv6
+         key field dst-ipv6-label hop-limit ipv6-length ipv6-next-header ipv6-traffic-class l4-dst-port l4-src-port src-ipv6-label tcp-control
+         action count drop mirror
+         packet ipv6 forwarding bridged
+         packet ipv6 forwarding routed
+         packet mpls ipv6 forwarding bridged
+         packet mpls ipv6 forwarding mpls
+      !
+      feature traffic-policy port ipv6 egress
+         key field dscp dst-ipv6-label ipv6-next-header l4-dst-port l4-src-port src-ipv6-label tcp-control
+         action count drop mirror
+         packet ipv6 forwarding routed
+         packet mpls ipv6 forwarding mpls
+      !
+   system profile rsp_12_2024
+{% endif %}
+{% endif %}

@@ -1,0 +1,11 @@
+# endpoints_vpws:
+#   - name: "VPWS_MNO-EVC1001"
+#     adapters:
+#       - switches: [ "BETA-PE-01" ]
+#         switch_ports: [ "Ethernet4"]
+#         endpoint_ports: [ "MNO-CSR"]
+#         sflow: true
+#       - switches: [ "THETA-PE-01" ]
+#         switch_ports: [ "Ethernet1"]
+#         endpoint_ports: [ "MNO-AGG"]
+#         sflow: true        

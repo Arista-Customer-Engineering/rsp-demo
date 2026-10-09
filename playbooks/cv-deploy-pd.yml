@@ -1,0 +1,36 @@
+- name: Patch fabric.yml with DHCPv6 PD sync neighbors
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Run add_dhcpv6_pd_sync.py
+      ansible.builtin.command:
+        cmd: python3 {{ playbook_dir }}/add_dhcpv6_pd_sync.py --inventory {{ playbook_dir }}/../inventories
+      register: script_result
+      changed_when: "'Written:' in script_result.stdout"
+
+    - name: Script output
+      ansible.builtin.debug:
+        var: script_result.stdout_lines
+        
+- name: Build EOS Designs for MPLS Only
+  hosts: mpls
+  gather_facts: false
+  tasks:
+    - name: Generate intended variables
+      ansible.builtin.import_role:
+        name: arista.avd.eos_designs
+- name: Build and Deploy All Host Configs
+  hosts: mpls
+  gather_facts: false
+  tasks:
+    - name: Generate device intended config and documentation
+      ansible.builtin.import_role:
+        name: arista.avd.eos_cli_config_gen
+    - name: Deploy configurations and tags to CloudVision
+      ansible.builtin.import_role:
+        name: arista.avd.cv_deploy
+      vars:
+        cv_server: www.cv-staging.corp.arista.io
+        cv_token: "{{ lookup('file', 'avd.tok') }}"
+        cv_submit_workspace: false

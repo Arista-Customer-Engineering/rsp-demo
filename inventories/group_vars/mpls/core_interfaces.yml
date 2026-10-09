@@ -1,0 +1,192 @@
+########################################################################################
+# Point to Point Network Interfaces within the MPLS Core Backbone - Not Customers
+########################################################################################
+core_interfaces:
+  p2p_links_ip_pools:
+  - name: UNDERLAY_POOL
+    ipv4_pool: 172.17.0.0/21
+  p2p_links_profiles:
+  - name: UNDERLAY
+    ip_pool: UNDERLAY_POOL
+    isis_hello_padding: true
+    isis_circuit_type: level-2
+    isis_authentication_mode: "md5"
+    isis_authentication_key: "ViLQY9CHEz5O37SKjYq6ow=="
+  - name: ROUTE_REFLECTORS
+    ip_pool: UNDERLAY_POOL
+    isis_hello_padding: true
+    isis_metric: 16777214
+    isis_circuit_type: level-2
+    isis_authentication_mode: "md5"
+    isis_authentication_key: "ViLQY9CHEz5O37SKjYq6ow=="
+  p2p_links:
+  - id: 1
+    profile: UNDERLAY
+    nodes: [ALPHA-PE-01, ALPHA-PE-02]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "ALPHA-PE-01"
+        interfaces: [Ethernet9, Ethernet10]
+      - node: "ALPHA-PE-02"
+        interfaces: [Ethernet9, Ethernet10]
+  - id: 2
+    profile: UNDERLAY
+    nodes: [BETA-PE-01, BETA-PE-02]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "BETA-PE-01"
+        interfaces: [Ethernet9, Ethernet10]
+      - node: "BETA-PE-02"
+        interfaces: [Ethernet9, Ethernet10]
+  - id: 3
+    profile: UNDERLAY
+    nodes: [GAMMA-PE-01, GAMMA-PE-02]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "GAMMA-PE-01"
+        interfaces: [Ethernet9, Ethernet10]
+      - node: "GAMMA-PE-02"
+        interfaces: [Ethernet9, Ethernet10]
+  - id: 4
+    profile: UNDERLAY
+    nodes: [DELTA-PE-01, DELTA-PE-02]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "DELTA-PE-01"
+        interfaces: [Ethernet9, Ethernet10]
+      - node: "DELTA-PE-02"
+        interfaces: [Ethernet9, Ethernet10]
+  - id: 5
+    profile: UNDERLAY
+    nodes: [ALPHA-PE-02, BETA-PE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "ALPHA-PE-02"
+        interfaces: [Ethernet6]
+      - node: "BETA-PE-01"
+        interfaces: [Ethernet6]
+  - id: 6
+    profile: UNDERLAY
+    nodes: [BETA-PE-02, GAMMA-PE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "BETA-PE-02"
+        interfaces: [Ethernet6]
+      - node: "GAMMA-PE-01"
+        interfaces: [Ethernet6]
+  - id: 7
+    profile: UNDERLAY
+    nodes: [GAMMA-PE-02, DELTA-PE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "GAMMA-PE-02"
+        interfaces: [Ethernet6]
+      - node: "DELTA-PE-01"
+        interfaces: [Ethernet6]
+  - id: 8
+    profile: UNDERLAY
+    nodes: [DELTA-PE-02, ALPHA-PE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "DELTA-PE-02"
+        interfaces: [Ethernet6]
+      - node: "ALPHA-PE-01"
+        interfaces: [Ethernet6]
+  - id: 9
+    profile: UNDERLAY
+    nodes: [ALPHA-PE-01, ALPHA-EDGE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "ALPHA-PE-01"
+        interfaces: [Ethernet8]
+      - node: "ALPHA-EDGE-01"
+        interfaces: [Ethernet10]
+  - id: 10
+    profile: UNDERLAY
+    nodes: [ALPHA-PE-02, ALPHA-EDGE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "ALPHA-PE-02"
+        interfaces: [Ethernet8]
+      - node: "ALPHA-EDGE-01"
+        interfaces: [Ethernet9]
+  - id: 11
+    profile: UNDERLAY
+    nodes: [BETA-PE-01, BETA-EDGE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "BETA-PE-01"
+        interfaces: [Ethernet8]
+      - node: "BETA-EDGE-01"
+        interfaces: [Ethernet10]
+  - id: 12
+    profile: UNDERLAY
+    nodes: [BETA-PE-02, BETA-EDGE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "BETA-PE-02"
+        interfaces: [Ethernet8]
+      - node: "BETA-EDGE-01"
+        interfaces: [Ethernet9]
+  - id: 13
+    profile: UNDERLAY
+    nodes: [ALPHA-PE-01, ALPHA-PE-03]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "ALPHA-PE-01"
+        interfaces: [Ethernet7]
+      - node: "ALPHA-PE-03"
+        interfaces: [Ethernet10]
+  - id: 14
+    profile: UNDERLAY
+    nodes: [ALPHA-PE-02, ALPHA-PE-03]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "ALPHA-PE-02"
+        interfaces: [Ethernet7]
+      - node: "ALPHA-PE-03"
+        interfaces: [Ethernet9]
+  - id: 15
+    profile: UNDERLAY
+    nodes: [DELTA-PE-01, THETA-PE-01]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "DELTA-PE-01"
+        interfaces: [Ethernet5]
+      - node: "THETA-PE-01"
+        interfaces: [Ethernet10]
+  - id: 16
+    profile: UNDERLAY
+    nodes: [DELTA-PE-02, THETA-PE-02]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "DELTA-PE-02"
+        interfaces: [Ethernet5]
+      - node: "THETA-PE-02"
+        interfaces: [Ethernet10]
+  - id: 17
+    profile: UNDERLAY
+    nodes: [THETA-PE-01, THETA-PE-02]
+    port_channel:
+      mode: active
+      nodes_child_interfaces:
+      - node: "THETA-PE-01"
+        interfaces: [Ethernet9]
+      - node: "THETA-PE-02"
+        interfaces: [Ethernet9]

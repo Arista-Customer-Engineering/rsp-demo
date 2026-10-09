@@ -1,0 +1,25 @@
+########################################################################################################################
+# SVI Profiles shared by all Provider Edge Elements
+########################################################################################################################
+svi_profiles:
+  - profile: "Voice DHCP"
+    ip_helpers:
+    - ip_helper: "192.168.100.10"
+      source_interface: "Loopback40"
+      source_vrf: "DHCP"
+  - profile: "CGN DHCP"
+    ip_helpers:
+    - ip_helper: "192.168.100.10"
+      source_interface: "Loopback40"
+      source_vrf: "DHCP"
+    raw_eos_cli: |
+      ipv6 dhcp relay destination 2001:db8:8000:2::100 vrf DHCP local-interface Loopback40
+      ipv6 dhcp relay install routes prefix-delegation
+  - profile: "PUBLIC DHCP"
+    ip_helpers:
+    - ip_helper: "192.168.100.10"
+      source_interface: "Loopback40"
+      source_vrf: "DHCP"
+    raw_eos_cli: |
+      ipv6 dhcp relay destination 2001:db8:8000:2::100 vrf DHCP local-interface Loopback40
+      ipv6 dhcp relay install routes prefix-delegation

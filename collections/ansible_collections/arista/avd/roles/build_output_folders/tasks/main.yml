@@ -1,0 +1,144 @@
+# Copyright (c) 2023-2026 Arista Networks, Inc.
+# Use of this source code is governed by the Apache License 2.0
+# that can be found in the LICENSE file.
+---
+# tasks file for build_directories
+
+- name: "Cleanup existing folders in {{ output_dir }}"
+  ansible.builtin.file:
+    path: "{{ output_dir }}"
+    state: absent
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder {{ output_dir }}"
+  ansible.builtin.file:
+    path: "{{ output_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for structured YAML files {{ structured_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ structured_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for EOS Configuration files {{ eos_config_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ eos_config_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for CVP structured YAML files {{ structured_cvp_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ structured_cvp_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create documentation folder {{ documentation_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ documentation_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for Fabric documentation {{ fabric_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ fabric_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for EOS documentation {{ devices_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ devices_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for EOS post backup dir {{ post_running_config_backup_dir }}"
+  ansible.builtin.file:
+    path: "{{ post_running_config_backup_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for EOS pre backup dir {{ pre_running_config_backup_dir }}"
+  ansible.builtin.file:
+    path: "{{ pre_running_config_backup_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: Create output directory for each EOS device
+  ansible.builtin.file:
+    path: "{{ snapshots_backup_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+# anta_runner directories
+
+- name: "Cleanup existing folders in {{ anta_dir_name ~ ', preserving ' ~ user_catalogs_dir_name }}"
+  ansible.builtin.find:
+    paths: "{{ anta_dir }}"
+    file_type: directory
+    excludes: "{{ user_catalogs_dir_name }}"
+  register: dirs_to_clean
+  delegate_to: localhost
+  run_once: true
+
+- name: "Remove found directories in {{ anta_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ dirs_to_clean.files }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for ANTA {{ anta_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ anta_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for ANTA user-defined catalogs {{ user_catalogs_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ user_catalogs_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for ANTA AVD generated catalogs {{ avd_catalogs_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ avd_catalogs_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true
+
+- name: "Create folder for ANTA reports {{ anta_reports_dir_name }}"
+  ansible.builtin.file:
+    path: "{{ anta_reports_dir }}"
+    state: directory
+    mode: "0o775"
+  delegate_to: localhost
+  run_once: true

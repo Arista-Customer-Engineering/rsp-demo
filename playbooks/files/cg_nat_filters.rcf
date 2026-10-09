@@ -1,0 +1,13 @@
+function FILTER_CGNAT_IMPORTS() {
+    # Allow all CGNAT VRF Routes to be imported from other PE routers
+    if (ext_community has_any {ROUTE-TARGET-AS:65000:50000}) {
+        return true;
+    }
+    # Allow an IPv6 default route into the CGNAT VRF, drop the rest.
+    if (prefix is ::/0) {
+        return true;
+    }
+    # Drop the rest
+    return false;
+}
+EOF

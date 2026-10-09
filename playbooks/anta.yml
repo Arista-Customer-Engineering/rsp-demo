@@ -1,0 +1,13 @@
+---
+- name: Run ANTA
+  hosts: mpls
+  connection: local
+  gather_facts: false
+  vars:
+    avd_catalogs_filters:
+      - device_list: "{{ groups['mpls'] }}"
+        skip_tests: [ "VerifyBFDPeersHealth", "VerifyInterfaceDiscards", "VerifyLoggingErrors", "VerifyNTP"]
+  tasks:
+    - name: Run ANTA on EOS devices
+      import_role:
+        name: arista.avd.anta_runner

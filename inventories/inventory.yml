@@ -1,0 +1,80 @@
+all:
+  vars:
+    lab_settings:
+      mgmt_prefix: "192.168.128."
+      mgmt_cidr: "24"
+      mgmt_gateway: "192.168.128.254"
+      default_mtu: "8000" # Required for Arista Cloud Test
+    default_mtu: "8000" # Required for Arista Cloud Test
+    # Other Ansible Settings
+    ansible_user: admin
+    ansible_password: admin
+    ansible_ssh_pass: admin
+    ansible_network_os: arista.eos.eos
+    ansible_become: true
+    ansible_become_method: enable
+    ansible_connection: httpapi
+    ansible_httpapi_port: 443
+    ansible_httpapi_use_ssl: true
+    ansible_httpapi_validate_certs: false
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  children:
+    ################### START OF MPLS FABRIC & CPEs ###################
+    mpls:
+      children:
+        services:
+          children:
+            edge_routers:
+              vars:
+                type: "pe"
+              hosts:
+                ALPHA-EDGE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}1"
+                BETA-EDGE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}2"
+            pe_routers:
+              vars:
+                type: "pe"
+              hosts:
+                ALPHA-PE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}3"
+                ALPHA-PE-02:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}4"
+                ALPHA-PE-03:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}5"               
+                BETA-PE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}6"
+                BETA-PE-02:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}7"
+                DELTA-PE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}8"
+                DELTA-PE-02:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}9"
+                GAMMA-PE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}10"
+                GAMMA-PE-02:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}11"
+                THETA-PE-01:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}12"
+                THETA-PE-02:
+                  ansible_host: "{{ lab_settings.mgmt_prefix }}13"                  
+
+    #################### END OF MPLS FABRIC ####################
+    non_fabric_nodes:
+      children:
+        pon_shelves:
+          hosts:
+            BETA-PON-01:
+              ansible_host: "{{ lab_settings.mgmt_prefix }}240"
+            OMNI-PON-01:
+              ansible_host: "{{ lab_settings.mgmt_prefix }}241"
+        transit_providers:
+          hosts:
+            TRANSIT:
+              ansible_host: "{{ lab_settings.mgmt_prefix }}220"
+        cg_nat_appliances:
+          hosts:
+            ALPHA-CG-NAT:
+              ansible_host: "{{ lab_settings.mgmt_prefix }}210"
+            BETA-CG-NAT:
+              ansible_host: "{{ lab_settings.mgmt_prefix }}211"

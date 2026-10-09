@@ -1,0 +1,25 @@
+---
+- name: Build EOS Designs for MPLS Only
+  hosts: mpls
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Generate intended variables
+      ansible.builtin.import_role:
+        name: arista.avd.eos_designs
+- name: Build EOS CLI for MPLS devices
+  hosts: mpls
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Generate device intended config and documentation
+      ansible.builtin.import_role:
+        name: arista.avd.eos_cli_config_gen
+- name: Build EOS CLI for transit providers and CG-NAT appliances
+  hosts: transit_providers:cg_nat_appliances:pon_shelves
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Generate device intended config and documentation
+      ansible.builtin.import_role:
+        name: arista.avd.eos_cli_config_gen

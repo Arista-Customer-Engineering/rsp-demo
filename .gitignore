@@ -1,0 +1,10 @@
+clab_eos_serial/
+*.persistent.clab.yml
+*.persistent.clab.yaml
+clab-**/**
+**/collections/*
+**/.DS_Store
+**/*.bak
+cv-token/*
+.venv/
+**/*.tok

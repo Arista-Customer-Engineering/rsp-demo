@@ -1,0 +1,35 @@
+---
+- name: Build EOS Designs for MPLS Only
+  hosts: mpls
+  gather_facts: false
+  tasks:
+    - name: Generate intended variables
+      ansible.builtin.import_role:
+        name: arista.avd.eos_designs
+- name: Build EOS CLI for all devices
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Generate device intended config and documentation
+      ansible.builtin.import_role:
+        name: arista.avd.eos_cli_config_gen
+
+- name: Deploy host Configs
+  hosts: all
+  gather_facts: false
+  vars:
+      ansible_connection: ansible.netcommon.network_cli
+  tasks:
+    - name: Download the new configuration
+      ansible.netcommon.cli_command:
+        command: "config replace http://192.168.1.153:8000/{{ inventory_hostname }}.cfg vrf OOB"
+
+- name: Deploy host Configs
+  hosts: all
+  gather_facts: false
+  vars:
+      ansible_connection: ansible.netcommon.network_cli
+  tasks:
+    - name: Download the new configuration
+      ansible.netcommon.cli_command:
+        command: "config replace http://192.168.1.153:8000/{{ inventory_hostname }}.cfg vrf OOB"

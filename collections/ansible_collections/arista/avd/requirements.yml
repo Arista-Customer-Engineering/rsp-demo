@@ -1,0 +1,4 @@
+# collection requirements leveraged by molecule etc
+collections:
+  - name: arista.eos
+    version: ">=7.0.0"

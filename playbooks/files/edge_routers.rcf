@@ -1,0 +1,29 @@
+function IMPORT_EDGE() {
+    return true;
+}
+
+function MPLS-OVERLAY-PEERS() {
+    return true;
+}
+
+function MPLS-OVERLAY-PEERS-PARTIAL() {
+    if (ext_community has_any {ROUTE-TARGET-AS:65000:60000}) {
+        if community match community_list CMTY_EDGE_RX {
+                return true;
+        }
+        #Allow default routes from transit providers.
+        else if (evpn.ip_prefix_route.prefix is 0.0.0.0/0 or evpn.ip_prefix_route.prefix is ::/0) {
+            return true;
+        }
+        #Deny any other INTERNET vrf routes.
+        else {
+            return false;
+        }
+    }
+    #Allow all other VRF routes.
+    else {
+        return true;
+    }
+}
+
+

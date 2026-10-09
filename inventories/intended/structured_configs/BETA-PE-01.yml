@@ -1,0 +1,799 @@
+aaa_authentication:
+  login:
+    default: local
+    console: local
+aaa_authorization:
+  exec:
+    default: local
+aaa_root:
+  disabled: true
+config_end: true
+daemon_terminattr:
+  cvaddrs:
+  - apiserver.cv-staging.corp.arista.io:443
+  cvauth:
+    method: token-secure
+    token_file: /mnt/flash/cv-onboarding-token
+  cvvrf: OOB
+  smashexcludes: ale,flexCounter,hardware,kni,pulse,strata
+enable_password:
+  disabled: true
+eos_cli: "dhcp relay\n   ipv6 routes sync neighbor 172.17.0.3\nplatform tfa\n  interface mode relaying\n"
+errdisable:
+  recovery_interval: 30
+ethernet_interfaces:
+- name: Ethernet9
+  description: P2P_BETA-PE-02_Ethernet9
+  shutdown: false
+  channel_group:
+    id: 9
+    mode: active
+  metadata:
+    peer: BETA-PE-02
+    peer_interface: Ethernet9
+    peer_type: pe
+- name: Ethernet10
+  description: P2P_BETA-PE-02_Ethernet10
+  shutdown: false
+  channel_group:
+    id: 9
+    mode: active
+  metadata:
+    peer: BETA-PE-02
+    peer_interface: Ethernet10
+    peer_type: pe
+- name: Ethernet6
+  description: P2P_ALPHA-PE-02_Ethernet6
+  shutdown: false
+  channel_group:
+    id: 6
+    mode: active
+  metadata:
+    peer: ALPHA-PE-02
+    peer_interface: Ethernet6
+    peer_type: pe
+- name: Ethernet8
+  description: P2P_BETA-EDGE-01_Ethernet10
+  shutdown: false
+  channel_group:
+    id: 8
+    mode: active
+  metadata:
+    peer: BETA-EDGE-01
+    peer_interface: Ethernet10
+    peer_type: pe
+- name: Ethernet5
+  shutdown: false
+  channel_group:
+    id: 5
+    mode: active
+  metadata:
+    peer_type: point_to_point_service
+- name: Ethernet4.1001
+  shutdown: false
+  encapsulation_vlan:
+    client:
+      encapsulation: dot1q
+      vlan: 1001
+    network: null
+  metadata:
+    peer_type: point_to_point_service
+- name: Ethernet4.1002
+  shutdown: false
+  encapsulation_vlan:
+    client:
+      encapsulation: dot1q
+      vlan: 1002
+    network: null
+  metadata:
+    peer_type: point_to_point_service
+- name: Ethernet2
+  description: PON_SHELF_PON_SHELF_BETA_CARD A
+  shutdown: false
+  channel_group:
+    id: 2
+    mode: active
+  metadata:
+    peer: PON_SHELF_BETA
+    peer_interface: CARD A
+    peer_type: pon_shelf
+    peer_key: endpoints_pon_shelves
+- name: Ethernet4
+  shutdown: false
+  metadata:
+    peer_type: l3_interface
+  switchport:
+    enabled: false
+event_monitor:
+  enabled: true
+hostname: BETA-PE-01
+interface_defaults:
+  mtu: 8000
+ip_dhcp_relay:
+  information_option: true
+ip_icmp_redirect: false
+ip_igmp_snooping:
+  globally_enabled: true
+ip_name_server:
+  vrfs:
+  - name: OOB
+    servers:
+    - ip_address: 8.8.8.8
+    - ip_address: 1.1.1.1
+ip_routing: true
+ip_virtual_router_mac_address: 00:c1:00:00:00:11
+load_interval:
+  default: 1
+local_users:
+- name: admin
+  privilege: 15
+  role: network-admin
+  sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+- name: dave.watkins
+  privilege: 15
+  role: network-admin
+  sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+logging:
+  console: disabled
+  buffered:
+    size: 64000
+    level: debugging
+  synchronous:
+    level: debugging
+  format:
+    timestamp: high-resolution
+loopback_interfaces:
+- name: Loopback0
+  description: ROUTER_ID
+  shutdown: false
+  ip_address: 172.16.0.6/32
+  isis_enable: CORE
+  isis_passive: true
+  node_segment:
+    ipv4_index: 6
+- name: Loopback50
+  description: CG-NAT Loopback
+  shutdown: false
+  vrf: CGNAT
+  ip_address: 172.16.50.6/32
+  ipv6_addresses:
+  - 2001:db8:8000:50::6/128
+- name: Loopback40
+  description: DHCP Relay Loopback
+  shutdown: false
+  vrf: DHCP
+  ip_address: 172.16.40.6/32
+  ipv6_addresses:
+  - 2001:db8:8000:40::6/128
+  hardware_forwarding_id: true
+- name: Loopback2
+  description: '[LOOPBACK_SVC]: Inband Management Loopback'
+  shutdown: false
+  vrf: INBAND_MGMT
+  ip_address: 172.16.2.6/32
+  hardware_forwarding_id: true
+- name: Loopback30
+  description: Internet Loopback
+  shutdown: false
+  vrf: INTERNET
+  ip_address: 80.100.0.6/32
+  ipv6_addresses:
+  - 2001:db8:8000:30::6/128
+  hardware_forwarding_id: true
+management_api_http:
+  enable_https: true
+  enable_vrfs:
+  - name: OOB
+management_console:
+  idle_timeout: 60
+management_interfaces:
+- name: Management0
+  description: OOB_MANAGEMENT
+  shutdown: false
+  vrf: OOB
+  ip_address: 192.168.128.6/24
+  type: oob
+  gateway: 192.168.128.254
+  eos_cli: 'no lldp transmit
+
+    no lldp receive
+
+    '
+management_ssh:
+  idle_timeout: 15
+  enable: false
+  vrfs:
+  - name: default
+    enable: true
+  - name: OOB
+    enable: true
+management_tech_support:
+  policy_show_tech_support:
+    exclude_commands:
+    - command: show platform fap ipv6 route
+    - command: show ipv6 bgp vrf all
+    - command: show ipv6 route vrf all detail
+metadata:
+  is_deployed: true
+  platform: 7280SR3
+  dc_name: RSP
+  fabric_name: mpls
+  cv_tags:
+    device_tags:
+    - name: topology_hint_datacenter
+      value: RSP
+    - name: topology_hint_fabric
+      value: mpls
+    - name: topology_hint_rack
+      value: Limited Routes
+mpls:
+  ip: true
+ntp:
+  servers:
+  - name: 192.5.41.209
+    preferred: true
+  - name: 192.5.41.40
+  - name: 192.5.41.41
+  vrf: OOB
+patch_panel:
+  patches:
+  - name: CGNAT_HA_FAILOVER
+    enabled: true
+    connectors:
+    - id: '1'
+      type: interface
+      endpoint: Port-Channel5
+    - id: '2'
+      type: pseudowire
+      endpoint: bgp vpws CGNAT_HA_FAILOVER pseudowire CGNAT_HA_FAILOVER
+  - name: MNO-EVC1001_1001
+    enabled: true
+    connectors:
+    - id: '1'
+      type: interface
+      endpoint: Ethernet4.1001
+    - id: '2'
+      type: pseudowire
+      endpoint: bgp vpws MNO_EVC_SVCS pseudowire MNO-EVC1001_1001
+  - name: MNO-EVC1002_1002
+    enabled: true
+    connectors:
+    - id: '1'
+      type: interface
+      endpoint: Ethernet4.1002
+    - id: '2'
+      type: pseudowire
+      endpoint: bgp vpws MNO_EVC_SVCS pseudowire MNO-EVC1002_1002
+port_channel_interfaces:
+- name: Port-Channel9
+  description: P2P_BETA-PE-02_Port-Channel9
+  shutdown: false
+  mtu: 9214
+  mpls:
+    ip: true
+  isis_enable: CORE
+  isis_metric: 1000
+  isis_network_point_to_point: true
+  isis_circuit_type: level-2
+  isis_hello_padding: true
+  isis_authentication:
+    both:
+      key_type: '7'
+      key: ViLQY9CHEz5O37SKjYq6ow==
+      mode: md5
+  ip_address: 172.17.0.2/31
+  metadata:
+    peer: BETA-PE-02
+    peer_interface: Port-Channel9
+    peer_type: pe
+  switchport:
+    enabled: false
+- name: Port-Channel6
+  description: P2P_ALPHA-PE-02_Port-Channel6
+  shutdown: false
+  mtu: 9214
+  mpls:
+    ip: true
+  isis_enable: CORE
+  isis_metric: 1000
+  isis_network_point_to_point: true
+  isis_circuit_type: level-2
+  isis_hello_padding: true
+  isis_authentication:
+    both:
+      key_type: '7'
+      key: ViLQY9CHEz5O37SKjYq6ow==
+      mode: md5
+  ip_address: 172.17.0.9/31
+  metadata:
+    peer: ALPHA-PE-02
+    peer_interface: Port-Channel6
+    peer_type: pe
+  switchport:
+    enabled: false
+- name: Port-Channel8
+  description: P2P_BETA-EDGE-01_Port-Channel10
+  shutdown: false
+  mtu: 9214
+  mpls:
+    ip: true
+  isis_enable: CORE
+  isis_metric: 1000
+  isis_network_point_to_point: true
+  isis_circuit_type: level-2
+  isis_hello_padding: true
+  isis_authentication:
+    both:
+      key_type: '7'
+      key: ViLQY9CHEz5O37SKjYq6ow==
+      mode: md5
+  ip_address: 172.17.0.20/31
+  metadata:
+    peer: BETA-EDGE-01
+    peer_interface: Port-Channel10
+    peer_type: pe
+  switchport:
+    enabled: false
+- name: Port-Channel5
+  shutdown: false
+  evpn_ethernet_segment:
+    identifier: 0000:0000:0000:0000:0002
+    route_target: 00:00:00:00:00:02
+  lacp_id: 0000.0000.0002
+  metadata:
+    peer_type: point_to_point_service
+  switchport:
+    enabled: false
+- name: Port-Channel2
+  description: 'PON_TRUNK: PON_SHELF_BETA'
+  shutdown: false
+  lacp_id: 3838.a600.0001
+  sflow:
+    enable: true
+  switchport:
+    enabled: false
+- name: Port-Channel2.1001
+  description: 'PON_SERVICE: PON_SHELF_BETA: PUBLIC'
+  encapsulation_vlan:
+    client:
+      encapsulation: dot1q
+      vlan: 1001
+    network: null
+  vlan_id: 1001
+  evpn_ethernet_segment:
+    identifier: 0000:0000:1111:0000:0001
+    route_target: '11:11:00:00:00:01'
+- name: Port-Channel2.1002
+  description: 'PON_SERVICE: PON_SHELF_BETA: CGNAT'
+  encapsulation_vlan:
+    client:
+      encapsulation: dot1q
+      vlan: 1002
+    network: null
+  vlan_id: 1002
+  evpn_ethernet_segment:
+    identifier: 0000:0000:1111:0000:0002
+    route_target: '11:11:00:00:00:02'
+- name: Port-Channel2.1003
+  description: 'PON_SERVICE: PON_SHELF_BETA: Management'
+  encapsulation_vlan:
+    client:
+      encapsulation: dot1q
+      vlan: 1003
+    network: null
+  vlan_id: 1003
+  evpn_ethernet_segment:
+    identifier: 0000:0000:1111:0000:0003
+    route_target: '11:11:00:00:00:03'
+prefix_lists:
+- name: DEFAULT_ONLY
+  sequence_numbers:
+  - sequence: 10
+    action: permit 0.0.0.0/0
+- name: PROVIDER_ROUTES
+  sequence_numbers:
+  - sequence: 10
+    action: permit 80.0.0.0/16 le 24
+  - sequence: 20
+    action: permit 81.0.0.0/16 le 24
+  - sequence: 30
+    action: permit 82.0.0.0/16 le 24
+route_maps:
+- name: DEFAULT_ONLY
+  sequence_numbers:
+  - sequence: 10
+    type: permit
+    match:
+    - ip address prefix-list DEFAULT_ONLY
+  - sequence: 20
+    type: deny
+- name: PROVIDER_ROUTES_ONLY
+  sequence_numbers:
+  - sequence: 10
+    type: permit
+    match:
+    - ip address prefix-list PROVIDER_ROUTES
+  - sequence: 20
+    type: deny
+router_bfd:
+  multihop:
+    interval: 300
+    min_rx: 300
+    multiplier: 3
+router_bgp:
+  as: '65000'
+  router_id: 172.16.0.6
+  maximum_paths:
+    paths: 4
+  bgp:
+    default:
+      ipv4_unicast: false
+  peer_groups:
+  - name: MPLS-OVERLAY-PEERS
+    metadata:
+      type: mpls
+    remote_as: '65000'
+    update_source: Loopback0
+    bfd: false
+    send_community: all
+    maximum_routes: 0
+  neighbors:
+  - ip_address: 172.16.0.1
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: ALPHA-EDGE-01
+    description: ALPHA-EDGE-01_Loopback0
+  - ip_address: 172.16.0.2
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: BETA-EDGE-01
+    description: BETA-EDGE-01_Loopback0
+  - ip_address: 172.16.0.3
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: ALPHA-PE-01
+    description: ALPHA-PE-01_Loopback0
+  - ip_address: 172.16.0.4
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: ALPHA-PE-02
+    description: ALPHA-PE-02_Loopback0
+  - ip_address: 172.16.0.5
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: ALPHA-PE-03
+    description: ALPHA-PE-03_Loopback0
+  - ip_address: 172.16.0.7
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: BETA-PE-02
+    description: BETA-PE-02_Loopback0
+  - ip_address: 172.16.0.10
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: DELTA-PE-01
+    description: DELTA-PE-01_Loopback0
+  - ip_address: 172.16.0.11
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: DELTA-PE-02
+    description: DELTA-PE-02_Loopback0
+  - ip_address: 172.16.0.8
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: GAMMA-PE-01
+    description: GAMMA-PE-01_Loopback0
+  - ip_address: 172.16.0.9
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: GAMMA-PE-02
+    description: GAMMA-PE-02_Loopback0
+  - ip_address: 172.16.0.12
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: THETA-PE-01
+    description: THETA-PE-01_Loopback0
+  - ip_address: 172.16.0.13
+    peer_group: MPLS-OVERLAY-PEERS
+    metadata:
+      peer: THETA-PE-02
+    description: THETA-PE-02_Loopback0
+  vlans:
+  - id: 1002
+    metadata:
+      tenants:
+      - CG-NAT Customer Data Services
+    rd: 172.16.0.6:51002
+    route_targets:
+      both:
+      - 65000:51002
+    redistribute_routes:
+    - learned
+  - id: 1001
+    metadata:
+      tenants:
+      - INTERNET
+    rd: 172.16.0.6:31001
+    route_targets:
+      both:
+      - 65000:31001
+    redistribute_routes:
+    - learned
+  vpws:
+  - name: CGNAT_HA_FAILOVER
+    rd: 172.16.0.6:55000
+    route_targets:
+      import_export: 65000:55000
+    pseudowires:
+    - name: CGNAT_HA_FAILOVER
+      id_local: 2
+      id_remote: 1
+  - name: MNO_EVC_SVCS
+    rd: 172.16.0.6:28000
+    route_targets:
+      import_export: 65000:28000
+    pseudowires:
+    - name: MNO-EVC1001_1001
+      id_local: 1002
+      id_remote: 1003
+    - name: MNO-EVC1002_1002
+      id_local: 1003
+      id_remote: 1004
+  address_family_evpn:
+    neighbor_default:
+      encapsulation: mpls
+      next_hop_self_source_interface: Loopback0
+    peer_groups:
+    - name: MPLS-OVERLAY-PEERS
+      activate: true
+  address_family_rtc:
+    peer_groups:
+    - name: MPLS-OVERLAY-PEERS
+      activate: true
+  address_family_ipv4:
+    peer_groups:
+    - name: MPLS-OVERLAY-PEERS
+      activate: false
+  vrfs:
+  - name: CGNAT
+    rd: 172.16.0.6:50000
+    route_targets:
+      import:
+      - address_family: evpn
+        route_targets:
+        - 65000:50000
+      export:
+      - address_family: evpn
+        route_targets:
+        - 65000:50000
+    router_id: 172.16.0.6
+    redistribute:
+      connected:
+        enabled: true
+  - name: DHCP
+    rd: 172.16.0.6:40000
+    route_targets:
+      import:
+      - address_family: evpn
+        route_targets:
+        - 65000:40000
+        - 65000:30000
+      export:
+      - address_family: evpn
+        route_targets:
+        - 65000:40000
+    router_id: 172.16.0.6
+    redistribute:
+      connected:
+        enabled: true
+      static:
+        enabled: true
+  - name: INBAND_MGMT
+    rd: 172.16.0.6:0
+    route_targets:
+      import:
+      - address_family: evpn
+        route_targets:
+        - '65000:0'
+      export:
+      - address_family: evpn
+        route_targets:
+        - '65000:0'
+    router_id: 172.16.0.6
+    redistribute:
+      connected:
+        enabled: true
+      static:
+        enabled: true
+  - name: INTERNET
+    rd: 172.16.0.6:30000
+    route_targets:
+      import:
+      - address_family: evpn
+        route_targets:
+        - 65000:30000
+        - 65000:40000
+      export:
+      - address_family: evpn
+        route_targets:
+        - 65000:30000
+    router_id: 172.16.0.6
+    redistribute:
+      connected:
+        enabled: true
+      static:
+        enabled: true
+router_isis:
+  instance: CORE
+  net: 49.0001.1720.1600.0006.00
+  router_id: 172.16.0.6
+  is_type: level-2
+  log_adjacency_changes: true
+  timers:
+    local_convergence:
+      protected_prefixes: true
+      delay: 10000
+  address_family_ipv4:
+    enabled: true
+    maximum_paths: 4
+    fast_reroute_ti_lfa:
+      mode: node-protection
+  segment_routing_mpls:
+    enabled: true
+    router_id: 172.16.0.6
+service_routing_protocols_model: multi-agent
+sflow:
+  sample: 8192
+  destinations:
+  - destination: 127.0.0.1
+  source_interface: Loopback0
+  run: true
+spanning_tree:
+  mode: none
+static_routes:
+- vrf: OOB
+  prefix: 0.0.0.0/0
+  next_hop: 192.168.128.254
+switchport_default:
+  mode: routed
+transceiver_qsfp_default_mode_4x10: false
+vlan_interfaces:
+- name: Vlan1002
+  description: PON_SHELF_BETA_DATA
+  shutdown: false
+  vrf: CGNAT
+  ip_address_virtual: 100.64.0.1/22
+  ip_helpers:
+  - ip_helper: 192.168.100.10
+    source_interface: Loopback40
+    vrf: DHCP
+  ipv6_enable: true
+  ipv6_address_virtuals:
+  - 2001:db8:8002:0000::1/64
+  metadata:
+    tenants:
+    - CG-NAT Customer Data Services
+  eos_cli: 'ipv6 dhcp relay destination 2001:db8:8000:2::100 vrf DHCP local-interface Loopback40
+
+    ipv6 dhcp relay install routes prefix-delegation
+
+    '
+- name: Vlan1001
+  description: PON_SHELF_SHARED_PUBLIC
+  shutdown: false
+  vrf: INTERNET
+  ip_address_virtual: 2.3.4.1/24
+  ip_helpers:
+  - ip_helper: 192.168.100.10
+    source_interface: Loopback40
+    vrf: DHCP
+  ipv6_enable: true
+  ipv6_address_virtuals:
+  - 2001:db8:8234:0000::1/64
+  metadata:
+    tenants:
+    - INTERNET
+  eos_cli: 'ipv6 dhcp relay destination 2001:db8:8000:2::100 vrf DHCP local-interface Loopback40
+
+    ipv6 dhcp relay install routes prefix-delegation'
+vlan_internal_order:
+  allocation: ascending
+  range:
+    beginning: 3500
+    ending: 3999
+vlans:
+- id: 1002
+  name: PON_SHELF_BETA_DATA
+  metadata:
+    tenants:
+    - CG-NAT Customer Data Services
+- id: 1001
+  name: PON_SHELF_SHARED_PUBLIC
+  metadata:
+    tenants:
+    - INTERNET
+vrfs:
+- name: OOB
+  ip_routing: false
+- name: CGNAT
+  description: CGNAT
+  ip_routing: true
+  ipv6_routing: true
+  metadata:
+    tenants:
+    - CG-NAT Customer Data Services
+- name: DHCP
+  description: DHCP Relay VRF
+  ip_routing: true
+  ipv6_routing: true
+  metadata:
+    tenants:
+    - DHCP Relay
+- name: INBAND_MGMT
+  description: Inband Management VRF
+  ip_routing: true
+  metadata:
+    tenants:
+    - Inband Management
+- name: INTERNET
+  description: Public INTERNET VRF
+  ip_routing: true
+  ipv6_routing: true
+  metadata:
+    tenants:
+    - INTERNET
+monitor_connectivity:
+  shutdown: false
+  interval: 1
+  interface_sets:
+  - name: Underlay
+    interfaces: Loopback0
+  hosts:
+  - name: ALPHA-EDGE-01
+    ip: 172.16.0.1
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: BETA-EDGE-01
+    ip: 172.16.0.2
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: ALPHA-PE-01
+    ip: 172.16.0.3
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: ALPHA-PE-02
+    ip: 172.16.0.4
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: ALPHA-PE-03
+    ip: 172.16.0.5
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: BETA-PE-02
+    ip: 172.16.0.7
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: GAMMA-PE-01
+    ip: 172.16.0.8
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: GAMMA-PE-02
+    ip: 172.16.0.9
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: DELTA-PE-01
+    ip: 172.16.0.10
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: DELTA-PE-02
+    ip: 172.16.0.11
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: THETA-PE-01
+    ip: 172.16.0.12
+    icmp_echo_size: 7000
+    local_interfaces: Underlay
+  - name: THETA-PE-02
+    ip: 172.16.0.13
+    icmp_echo_size: 7000
+    local_interfaces: Underlay

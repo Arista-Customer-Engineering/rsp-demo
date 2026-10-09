@@ -1,0 +1,42 @@
+- name: Build EOS Designs for MPLS Only
+  hosts: mpls
+  gather_facts: false
+  tasks:
+    - name: Generate intended variables
+      ansible.builtin.import_role:
+        name: arista.avd.eos_designs
+
+# - name: Build all configurations
+#   hosts: all
+#   gather_facts: false
+#   tasks:
+#     - name: Generate device intended config and documentation
+#       ansible.builtin.import_role:
+#         name: arista.avd.eos_cli_config_gen
+
+# - name: Fix configurations for cEOS CLI guard ignores
+#   hosts: localhost
+#   gather_facts: false
+#   tasks:
+#     - name: Finding AVD config files
+#       find:
+#         paths: "{{ lookup('env', 'PWD') }}/inventories/intended/configs/"
+#         file_type: file
+#         patterns: '*.cfg'
+#       become: true
+#       register: c1
+#     - name: "Removing CLI debug parser guards from configs"
+#       lineinfile:
+#         path: "{{ item.path }}"          
+#         insertbefore: "!"
+#         firstmatch: yes
+#         line: "no cli debug parser guard"
+#       with_items: "{{ c1.files }}"
+
+- name: Deploy all configurations
+  hosts: mpls:transit_providers:cg_nat_appliances
+  gather_facts: false
+  tasks:
+    - name: Deploy configuration to device
+      ansible.builtin.import_role:
+       name: arista.avd.eos_config_deploy_eapi

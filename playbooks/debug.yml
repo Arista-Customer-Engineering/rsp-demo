@@ -1,0 +1,6 @@
+- hosts: all
+  gather_facts: false
+  tasks:
+   - name: Print all variables
+     debug:
+       var: hostvars[inventory_hostname]["pe"]["node_groups"]

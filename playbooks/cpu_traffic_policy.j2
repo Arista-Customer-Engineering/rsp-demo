@@ -1,0 +1,228 @@
+{#
+Jinja Template to build CPU Traffic Policies from information already within the 
+variables available from a host during a playbook run. 
+
+AVD doesn't currently support all of the features we require in the `eos_cli_config_gen`.
+-#}
+{% set underlay_loopbacks = [] -%}
+{% if pe_partial is defined %}
+{{ underlay_loopbacks.append(pe_partial.defaults.loopback_ipv4_pool) -}}
+{% endif %}
+{% if pe_full is defined %}
+{{ underlay_loopbacks.append(pe_full.defaults.loopback_ipv4_pool) -}}
+{% endif %}
+{% if pe_rr is defined %}
+{{ underlay_loopbacks.append(pe_rr.defaults.loopback_ipv4_pool) -}}
+{% endif %}
+{% if awe_rr is defined %}
+{{ underlay_loopbacks.append(awe_rr.defaults.loopback_ipv4_pool) -}}
+{% endif %}
+
+{% if metadata is defined and metadata.platform is defined %}
+{% if "veos" not in metadata.platform %}
+traffic-policies
+  field-set ipv4 prefix ALLOWED-MGMT
+      10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+  !
+  field-set ipv4 prefix DNS-SERVERS-V4
+      {{ ip_name_server.vrfs | map(attribute='servers') | sum(start=[]) | map(attribute='ip_address') | join('/32 ') }}/32
+  !
+  field-set ipv4 prefix LOOPBACK-V4
+{{ underlay_loopbacks | unique | join(" ")}}
+  !
+  field-set ipv4 prefix MGMT-LOOPBACK-V4
+{% if inband_management is defined %}
+{%   for entry in inband_management if entry.name == "Inband Management" %}
+{%     for vrf in entry.vrfs if vrf.name == "INBAND_MGMT" %}
+{%       if vrf.vtep_diagnostic is defined %}
+      {{ vrf.vtep_diagnostic.loopback_ip_range }}
+{%       endif  %}
+{%       if vrf.l3_interfaces is defined %}
+{%         for interface in vrf.l3_interfaces %}
+{%           for key, value in interface.items() %}
+{%             if "ip_addresses" in key %}
+{%               for address in value %}
+      {{ address }}
+{%               endfor %}
+{%             endif %}
+{%           endfor %}
+{%         endfor %}
+{%       endif %}
+{%     endfor %}
+{%   endfor%}
+{% endif %}
+  !
+  field-set ipv4 prefix NTP-SERVERS-V4
+      {{ ntp.servers | map(attribute='name') | join('/32 ') }}/32
+  !
+  field-set ipv4 prefix ROUTING-LINKS-V4
+{% for pool in core_interfaces.p2p_links_ip_pools %}
+ {{ pool.ipv4_pool }}
+{% endfor %}
+  !
+  field-set ipv4 prefix MULTICAST-ALL-ROUTERS
+      224.0.0.2/32
+  !
+  field-set ipv4 prefix PIM-V4
+      224.0.0.1/32 224.0.0.13/32
+  !
+  field-set ipv4 prefix RFC-1918-V4
+      10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+  !
+  field-set ipv4 prefix SNMP-SERVERS-V4
+  !
+  field-set ipv4 prefix VRRP-V4
+      224.0.0.18/32
+  !
+  traffic-policy CPU-PROTECT
+      counter BFD-V4 BGP-V4 DHCP-V4 DNS-V4 FRAGMENT-V4 HTTPS-V4 ICMP-V4 IPV4-ALL-DEAFAULT IPV6-ALL-DEAFAULT NTP-V4 SMALL-PACKETS-V4 SNMP-V4 SSH-IN-V4 SSH-OUT-V4 TERMINATTR-V4 TRACEROUTE-V4
+      !
+      match SMALL-PACKETS-V4 ipv4
+        ip length 0-24
+        !
+        actions
+            count SMALL-PACKETS-V4
+            drop
+      !
+      match SSH-IN-V4 ipv4
+        {# 
+        Allow SSH / SCP Inbound Traffic on `mgmt` VRF Loopbacks
+        WARNING: LOOPBACK-V4 and ROUTING-LINKS-V4 should only be used when the default VRF is infrastructure only (no Internet)
+        #}
+        source prefix field-set ALLOWED-MGMT MGMT-LOOPBACK-V4 LOOPBACK-V4 ROUTING-LINKS-V4
+        destination prefix field-set MGMT-LOOPBACK-V4 LOOPBACK-V4 ROUTING-LINKS-V4
+        protocol tcp source port all destination port ssh
+        !
+        actions
+            count SSH-IN-V4
+            police rate 100 mbps
+      !
+      match SSH-OUT-V4 ipv4
+        {# 
+        Allow SSH / SCP Outbund Traffic on `mgmt` VRF Loopbacks
+        WARNING: LOOPBACK-V4 and ROUTING-LINKS-V4 should only be used when the default VRF is infrastructure only (no Internet)
+        #}
+        source prefix field-set MGMT-LOOPBACK-V4 ALLOWED-MGMT LOOPBACK-V4 ROUTING-LINKS-V4
+        destination prefix field-set MGMT-LOOPBACK-V4 LOOPBACK-V4 ROUTING-LINKS-V4
+        protocol tcp flags established
+        protocol tcp source port ssh destination port all
+        !
+        actions
+            count SSH-OUT-V4
+            police rate 100 mbps
+      !
+      match DHCP ipv4
+        protocol udp source port all destination port bootps
+        !
+        actions
+            count DHCP-V4
+            police rate 5 mbps
+      !
+      match NTP-V4 ipv4
+        source prefix field-set NTP-SERVERS-V4
+        destination prefix field-set MGMT-LOOPBACK-V4
+        protocol udp source port ntp destination port all
+        !
+        actions
+            count NTP-V4
+            police rate 100 kbps
+      !
+      {# Required for CVaaS #}
+      match HTTPS-V4 ipv4
+        destination prefix field-set MGMT-LOOPBACK-V4
+        protocol tcp flags established
+        protocol tcp source port https destination port all
+        !
+        actions
+            count HTTPS-V4
+            police rate 100 mbps
+      !
+      match DNS-V4 ipv4
+        source prefix field-set DNS-SERVERS-V4
+        destination prefix field-set MGMT-LOOPBACK-V4
+        protocol udp source port domain destination port all
+        !
+        actions
+            count DNS-V4
+            police rate 100 kbps
+      !
+      match BFD-V4 ipv4
+        protocol udp source port all destination port 3784-3785, 4784, 6784, 7784
+        !
+        actions
+            count BFD-V4
+            police rate 10 mbps
+      !
+      match ICMP-V4 ipv4
+        protocol icmp
+        !
+        actions
+            count ICMP-V4
+            police rate 500 kbps
+      !
+      match ICMP6-ECHO ipv6
+        protocol icmpv6 type 128-129 code all
+        !
+        actions
+            count
+            police rate 5 mbps
+      !
+      match ICMP6-REDIR-UNREACH-TTL-SIZE ipv6
+        protocol icmpv6 type 1-3, 137 code all
+        !
+        actions
+            count
+            police rate 500 kbps
+      !
+      match ICMP6-NS-NA ipv6
+        protocol icmpv6 type 135-136 code all
+        ttl 255
+        !
+        actions
+            count
+      !
+      match ICMP6-OTHER ipv6
+        protocol icmpv6
+        !
+        actions
+            count
+            police rate 1 mbps
+      !
+      match TRACEROUTE-V4 ipv4
+        protocol udp source port all destination port 33434-33534
+        !
+        actions
+            count TRACEROUTE-V4
+            police rate 500 kbps
+      !
+      match BGP-V4 ipv4
+        protocol neighbors bgp
+        !
+        actions
+            count BGP-V4
+      !
+      match BGP-STATIC-v6 ipv6
+        protocol neighbors bgp
+        !
+        actions
+            count
+      !
+      match SNMP-V4 ipv4
+        source prefix field-set SNMP-SERVERS-V4
+        protocol udp source port all destination port snmp
+        !
+        actions
+            count SNMP-V4
+            police rate 10 mbps
+      !
+      match ipv4-all-default ipv4
+        actions
+            count IPV4-ALL-DEAFAULT
+            drop
+      !
+      match ipv6-all-default ipv6
+        actions
+            count IPV6-ALL-DEAFAULT
+            drop
+{% endif %}
+{% endif %}

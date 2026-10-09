@@ -1,0 +1,161 @@
+#############################################################################
+# `eos_cli_config_gen` definitions shared between all nodes
+#############################################################################
+platform_settings:
+  - platforms: [ 'VEOS', 'VEOS-LAB', 'vEOS', 'vEOS-lab', 'cEOS', 'cEOS-lab', 'CEOS', 'CEOS-LAB']
+    reload_delay:
+      mlag: 300
+      non_mlag: 330
+    default_interface_mtu: "{{ lab_settings.default_mtu }}"
+    feature_support:
+      queue_monitor_length_notify: false
+      interface_storm_control: false
+      per_interface_mtu: false
+
+custom_structured_configuration_daemon_terminattr:
+  cvaddrs:
+    - "apiserver.cv-staging.corp.arista.io:443"
+  cvauth:
+    method: "token-secure"
+    token_file: "/mnt/flash/cv-onboarding-token"
+  smashexcludes: "ale,flexCounter,hardware,kni,pulse,strata"
+  cvvrf: "OOB"
+
+
+# cv_settings:
+#   cvaas:
+#     enabled: true
+#     clusters: # default=[{'name': 'cvaas'}]
+#       - name: davewatkins-lab
+#         region: staging
+#         vrf: OOB
+#         source_interface: Management0
+
+custom_structured_configuration_transceiver_qsfp_default_mode_4x10: false
+# Disable LLDP for a cleaner CloudVision Topology
+
+custom_structured_configuration_management_interfaces:
+  - name: "Management0"
+    eos_cli: |
+      no lldp transmit
+      no lldp receive
+custom_structured_configuration_errdisable:
+  recovery_interval: 30
+
+load_interval:
+  default: 1
+
+custom_structured_configuration_interface_defaults:
+  # ethernet:
+  #   shutdown: true
+  mtu: "{{ lab_settings.default_mtu }}"
+
+custom_structured_configuration_vlan_internal_order:
+  allocation: ascending
+  range:
+    beginning: 3500
+    ending: 3999
+
+# Routing
+bgp_update_wait_install: false
+custom_structured_configuration_ip_routing: true
+custom_structured_configuration_service_routing_protocols_model: multi-agent
+custom_structured_configuration_ip_icmp_redirect: false
+
+custom_structured_configuration_switchport_default:
+  mode: routed
+
+custom_structured_configuration_spanning_tree:
+  mode: none
+
+# Required to forward DHCP Relay packets
+custom_structured_configuration_ip_dhcp_relay:
+  information_option: true
+
+#############################################################################
+# Management Settings
+#############################################################################
+aaa_settings:
+  authentication:
+    login:
+      default: "local"
+      console: "local"
+  authorization:
+    exec:
+      default: "local"
+  local_users:
+    - name: "admin"
+      privilege: 15
+      role: "network-admin"
+      sha512_password: "$6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81"
+    - name: "dave.watkins"
+      privilege: 15
+      role: "network-admin"
+      sha512_password: "$6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81"    
+
+custom_structured_configuration_management_console:
+  idle_timeout: 60
+
+event_monitor:
+  enabled: true
+
+ntp_settings:
+  server_vrf: "OOB"
+  servers:
+  - name: 192.5.41.209   # ntp2.usno.navy.mil
+  - name: 192.5.41.40    # tick.usno.navy.mil
+  - name: 192.5.41.41    # tock.usno.navy.mil
+  # - name: 18.26.4.105    # bonehed.lcs.mit.edu
+
+custom_structured_configuration_logging:
+  console: disabled
+  buffered:
+    size: 64000
+    level: debugging
+  synchronous:
+    level: debugging
+  format:
+    timestamp: high-resolution
+
+dns_settings:
+  servers:
+    - ip_address: "8.8.8.8"
+      vrf: "OOB"
+    - ip_address: "1.1.1.1"
+      vrf: "OOB"
+
+management_eapi:
+
+  # Enable/Disable api http-commands.
+  enabled: true
+  vrfs: 
+    - name: OOB
+      enabled: true
+
+custom_structured_configuration_management_ssh:
+  idle_timeout: 15
+  enable: false
+  vrfs:
+    - name: default
+      enable: true
+    - name: OOB
+      enable: true
+
+custom_structured_configuration_management_tech_support:
+  policy_show_tech_support:
+    exclude_commands:
+      - command: "show platform fap ipv6 route"
+      - command: "show ipv6 bgp vrf all"
+      - command: "show ipv6 route vrf all detail"
+      # - command: "show kernel ipv6 route vrf all"
+
+generate_cv_tags:
+  topology_hints: true
+#############################################################################
+# Disabled for vEOS / cEOS Labs
+#hardware_counters:
+#  features:
+#    - name: traffic-policy
+#      direction: cpu
+#router_general:
+#  nexthop_fast_failover: true

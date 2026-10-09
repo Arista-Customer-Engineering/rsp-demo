@@ -1,0 +1,60 @@
+---
+# Adds DHCPv6 PD route-sync config to AVD for all PEs participating in
+# anycast-gateway SVIs with prefix-delegation relay.
+#
+# Steps:
+#   patch  — run add_dhcpv6_pd_sync.py to update host_vars YAML
+#   build  — regenerate AVD structured configs and EOS CLI configs
+#   deploy — (opt-in) push to PE nodes via eAPI
+#
+# Usage:
+#   ansible-playbook playbooks/add_dhcpv6_pd_sync.yml               # patch + build
+#   ansible-playbook playbooks/add_dhcpv6_pd_sync.yml --tags deploy  # also deploy
+#   ansible-playbook playbooks/add_dhcpv6_pd_sync.yml --tags patch --extra-vars "dry_run=true"
+
+- name: Generate DHCPv6 PD sync host_vars
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  tags: [patch]
+  vars:
+    dry_run: false
+    script: "{{ playbook_dir }}/../add_dhcpv6_pd_sync.py"
+    inventory_dir: "{{ playbook_dir }}/../inventories"
+  tasks:
+    - name: Run add_dhcpv6_pd_sync.py
+      ansible.builtin.command:
+        cmd: >
+          ~/.venv/avd-6.0/bin/python {{ script }}
+          --inventory {{ inventory_dir }}
+          {% if dry_run | bool %}--dry-run{% endif %}
+      register: script_result
+      changed_when: "'Written:' in script_result.stdout"
+
+    - name: Script output
+      ansible.builtin.debug:
+        var: script_result.stdout_lines
+
+- name: Regenerate AVD structured configs
+  hosts: mpls
+  gather_facts: false
+  connection: local
+  tags: [build]
+  tasks:
+    - name: Generate intended variables (eos_designs)
+      ansible.builtin.import_role:
+        name: arista.avd.eos_designs
+
+    - name: Generate device configs (eos_cli_config_gen)
+      ansible.builtin.import_role:
+        name: arista.avd.eos_cli_config_gen
+
+- name: Deploy to PE nodes
+  hosts: pe_routers
+  gather_facts: false
+  connection: local
+  tags: [deploy, never]
+  tasks:
+    - name: Push config via eAPI
+      ansible.builtin.import_role:
+        name: arista.avd.eos_config_deploy_eapi

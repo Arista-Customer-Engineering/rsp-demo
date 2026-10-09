@@ -1,0 +1,43 @@
+services_vpws:
+  - name: "MNO_EVC_SVCS"
+    # mac_vrf_id_base: 20000
+    pseudowire_rt_base: 28000
+    point_to_point_services:
+      - name: "MNO-EVC1001"
+        type: "vpws-pseudowire"
+        subinterfaces:
+          - number: 1001
+            structured_config:
+              # sflow:
+              #   enable: true
+              encapsulation_vlan:
+                client:
+                  encapsulation: "dot1q"
+                  vlan: 1001
+                network:        
+        endpoints:
+          - id: 1
+            nodes: ["BETA-PE-01"]
+            interfaces: ["Ethernet4"]
+          - id: 2
+            nodes: ["THETA-PE-01"]
+            interfaces: ["Ethernet1"]
+      - name: "MNO-EVC1002"
+        type: "vpws-pseudowire"
+        subinterfaces:
+          - number: 1002
+            structured_config:
+              # sflow:
+              #   enable: true
+              encapsulation_vlan:
+                client:
+                  encapsulation: "dot1q"
+                  vlan: 1002
+                network:        
+        endpoints:
+          - id: 1
+            nodes: ["BETA-PE-01"]
+            interfaces: ["Ethernet4"]
+          - id: 2
+            nodes: ["THETA-PE-01"]
+            interfaces: ["Ethernet1"]            

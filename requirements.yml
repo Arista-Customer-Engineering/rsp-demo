@@ -1,0 +1,6 @@
+---
+collections:
+  - name: arista.avd
+  - name: https://github.com/sonic-com/arista.eos.git
+    type: git
+    version: bugfix/accept-multiline-input-via-eapi

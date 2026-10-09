@@ -1,0 +1,312 @@
+name: sp
+prefix: ""
+mgmt:
+  network: sp
+  bridge: br1
+  ipv4-subnet: 192.168.128.0/24
+  ipv4-gw: 192.168.128.254
+topology:
+  kinds:
+    ceos:
+      image: ceos:4.35.2F
+      env:
+        CLAB_MGMT_VRF: OOB
+  nodes:
+    # MPLS Fabric Nodes
+    SHIRE-EDGE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.1
+      startup-config: inventories/intended/configs/SHIRE-EDGE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/SHIRE-EDGE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    MORDOR-EDGE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.2
+      startup-config: inventories/intended/configs/MORDOR-EDGE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/MORDOR-EDGE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    SHIRE-PE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.3
+      startup-config: inventories/intended/configs/SHIRE-PE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/SHIRE-PE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    SHIRE-PE-02:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.4
+      startup-config: inventories/intended/configs/SHIRE-PE-02.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/SHIRE-PE-02/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    SHIRE-PE-03:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.5
+      startup-config: inventories/intended/configs/SHIRE-PE-03.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/SHIRE-PE-03/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    MORDOR-PE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.6
+      startup-config: inventories/intended/configs/MORDOR-PE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/MORDOR-PE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    MORDOR-PE-02:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.7
+      startup-config: inventories/intended/configs/MORDOR-PE-02.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/MORDOR-PE-02/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    ROHAN-PE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.8
+      startup-config: inventories/intended/configs/ROHAN-PE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/ROHAN-PE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    ROHAN-PE-02:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.9
+      startup-config: inventories/intended/configs/ROHAN-PE-02.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/ROHAN-PE-02/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    GONDOR-PE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.10
+      startup-config: inventories/intended/configs/GONDOR-PE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/GONDOR-PE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    GONDOR-PE-02:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.11
+      startup-config: inventories/intended/configs/GONDOR-PE-02.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/GONDOR-PE-02/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    LORIEN-PE-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.12
+      startup-config: inventories/intended/configs/LORIEN-PE-01.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/LORIEN-PE-01/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    LORIEN-PE-02:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.13
+      startup-config: inventories/intended/configs/LORIEN-PE-02.cfg
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/LORIEN-PE-02/ceos-config
+          - /home/dwatkins/arista-ce/rsp-demo/cv-onboarding-token
+    SHIRE-DHCP:
+      kind: linux
+      image: shire-dhcp:local
+      mgmt-ipv4: 192.168.128.200
+      binds:
+        - dhcp/kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf:ro
+        - dhcp/kea-dhcp6.conf:/etc/kea/kea-dhcp6.conf:ro
+        - dhcp/dnsmasq.conf:/etc/dnsmasq.conf:ro
+    SHIRE-CG-NAT:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.210
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/SHIRE-CG-NAT/ceos-config
+    MORDOR-CG-NAT:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.211
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/MORDOR-CG-NAT/ceos-config
+    TRANSIT:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.220
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/TRANSIT/ceos-config
+    MORDOR-PON-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.240
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/MORDOR-PON-01/ceos-config
+    EREBOR-PON-01:
+      kind: ceos
+      mgmt-ipv4: 192.168.128.241
+      extras:
+        ceos-copy-to-flash:
+          - /home/dwatkins/arista-ce/rsp-demo/clab_eos_serial/EREBOR-PON-01/ceos-config
+    MORDOR-CPE-01:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.250
+      binds:
+        - traffic/cpe-traffic.sh:/cpe-traffic.sh:ro
+      exec:
+        - ip link set eth1 up
+        - udhcpc -i eth1 -b -q
+        - sh -c 'apk add -q --no-cache odhcp6c 2>/dev/null && odhcp6c -P 56 eth1
+          &'
+        - sh -c 'chmod +x /cpe-traffic.sh && nohup /cpe-traffic.sh &'
+    MORDOR-CPE-02:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.251
+      binds:
+        - traffic/cpe-traffic.sh:/cpe-traffic.sh:ro
+      exec:
+        - ip link set eth1 up
+        - udhcpc -i eth1 -b -q
+        - sh -c 'apk add -q --no-cache odhcp6c 2>/dev/null && odhcp6c -P 56 eth1
+          &'
+        - sh -c 'chmod +x /cpe-traffic.sh && nohup /cpe-traffic.sh &'
+    # Customer (CPE) Linux nodes off EREBOR-PON-01
+    EREBOR-CPE-01:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.252
+      binds:
+        - traffic/cpe-traffic.sh:/cpe-traffic.sh:ro
+      exec:
+        - ip link set eth1 up
+        - udhcpc -i eth1 -b -q
+        - sh -c 'apk add -q --no-cache odhcp6c 2>/dev/null && odhcp6c -P 56 eth1
+          &'
+        - sh -c 'chmod +x /cpe-traffic.sh && nohup /cpe-traffic.sh &'
+    EREBOR-CPE-02:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.253
+      binds:
+        - traffic/cpe-traffic.sh:/cpe-traffic.sh:ro
+      exec:
+        - ip link set eth1 up
+        - udhcpc -i eth1 -b -q
+        - sh -c 'apk add -q --no-cache odhcp6c 2>/dev/null && odhcp6c -P 56 eth1
+          &'
+        - sh -c 'chmod +x /cpe-traffic.sh && nohup /cpe-traffic.sh &'
+    # MNO nodes — cell site router and core aggregation
+    #   MNO-CSR: simulates cell site router (eNB side), off MORDOR-PE-01
+    #   MNO-AGG: simulates MNO aggregation (MME/SGW side), dual-homed to LORIEN-PEs
+    MNO-CSR:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.63
+      binds:
+        - traffic:/traffic:ro
+      exec:
+        - ip link set eth1 up
+        - ip addr add 172.19.128.120/31 dev eth1
+        - sh -c 'pkill -f "udhcpc.*eth1" 2>/dev/null; true'
+        - sysctl -w net.ipv6.conf.eth1.accept_ra=0
+        - sysctl -w net.ipv6.conf.eth1.autoconf=0
+        - sh -c 'nohup sh -c "sleep 30 && python3 /traffic/mno-csr.py >> 
+          /var/log/mno-csr.log 2>&1" &'
+    MNO-AGG:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.62
+      binds:
+        - traffic:/traffic:ro
+      exec:
+        - ip link set eth1 up
+        - ip link set eth2 up
+        - ip addr add 172.19.128.121/31 dev eth1
+        - sh -c 'pkill -f "udhcpc.*eth1" 2>/dev/null; pkill -f "udhcpc.*eth2" 
+          2>/dev/null; true'
+        - sysctl -w net.ipv6.conf.eth1.accept_ra=0
+        - sysctl -w net.ipv6.conf.eth1.autoconf=0
+        - sysctl -w net.ipv6.conf.eth2.accept_ra=0
+        - sysctl -w net.ipv6.conf.eth2.autoconf=0
+        - sh -c 'nohup sh -c "sleep 30 && python3 /traffic/mno-agg.py >> 
+          /var/log/mno-agg.log 2>&1" &'
+    # Traffic generator — iperf3/HTTP servers, loopbacks for well-known IPs
+    TRAFFIC-GEN:
+      kind: linux
+      image: ghcr.io/nicolaka/netshoot
+      mgmt-ipv4: 192.168.128.248
+      binds:
+        - traffic/tgen-startup.sh:/tgen-startup.sh:ro
+      exec:
+        - sh -c 'chmod +x /tgen-startup.sh && /tgen-startup.sh &'
+  links:
+    # PE Interlinks
+    - endpoints: [SHIRE-PE-01:eth10, SHIRE-PE-02:eth10]
+    - endpoints: [SHIRE-PE-01:eth9, SHIRE-PE-02:eth9]
+    - endpoints: [MORDOR-PE-01:eth10, MORDOR-PE-02:eth10]
+    - endpoints: [MORDOR-PE-01:eth9, MORDOR-PE-02:eth9]
+    - endpoints: [ROHAN-PE-01:eth10, ROHAN-PE-02:eth10]
+    - endpoints: [ROHAN-PE-01:eth9, ROHAN-PE-02:eth9]
+    - endpoints: [GONDOR-PE-01:eth10, GONDOR-PE-02:eth10]
+    - endpoints: [GONDOR-PE-01:eth9, GONDOR-PE-02:eth9]
+    # Edge Routers
+    - endpoints: [SHIRE-PE-01:eth8, SHIRE-EDGE-01:eth10]
+    - endpoints: [SHIRE-PE-02:eth8, SHIRE-EDGE-01:eth9]
+    - endpoints: [MORDOR-PE-01:eth8, MORDOR-EDGE-01:eth10]
+    - endpoints: [MORDOR-PE-02:eth8, MORDOR-EDGE-01:eth9]
+    # Leafs
+    - endpoints: [SHIRE-PE-01:eth7, SHIRE-PE-03:eth10]
+    - endpoints: [SHIRE-PE-02:eth7, SHIRE-PE-03:eth9]
+    # POP Interlinks
+    - endpoints: [SHIRE-PE-02:eth6, MORDOR-PE-01:eth6]
+    - endpoints: [MORDOR-PE-02:eth6, GONDOR-PE-01:eth6]
+    - endpoints: [ROHAN-PE-01:eth6, GONDOR-PE-02:eth6]
+    - endpoints: [ROHAN-PE-02:eth6, SHIRE-PE-01:eth6]
+    # LORIEN-PE uplinks (reusing eth5 from former CPE-ACME-ENT)
+    - endpoints: [ROHAN-PE-01:eth5, LORIEN-PE-01:eth10]
+    - endpoints: [ROHAN-PE-02:eth5, LORIEN-PE-02:eth10]
+    # LORIEN-PE interlink
+    - endpoints: [LORIEN-PE-01:eth9, LORIEN-PE-02:eth9]
+    # MNO-AGG dual-homed to LORIEN-PEs
+    - endpoints: [LORIEN-PE-01:eth1, MNO-AGG:eth1]
+    - endpoints: [LORIEN-PE-02:eth1, MNO-AGG:eth2]
+    # MNO-CSR off MORDOR-PE-01
+    - endpoints: [MORDOR-PE-01:eth4, MNO-CSR:eth1]
+    # DHCP Server
+    - endpoints: [SHIRE-PE-03:eth1, SHIRE-DHCP:eth1]
+    # Transit Peering Router
+    - endpoints: [SHIRE-EDGE-01:eth1, TRANSIT:eth1]
+    - endpoints: [SHIRE-EDGE-01:eth2, TRANSIT:eth2]
+    - endpoints: [MORDOR-EDGE-01:eth1, TRANSIT:eth3]
+    # Transit Loopback for BGP peering, traffic generator upstream of TRANSIT
+    - endpoints: [TRANSIT:eth5, TRANSIT:eth6]
+    # CG-NAT Shelves
+    - endpoints: [SHIRE-EDGE-01:eth3, SHIRE-CG-NAT:eth1]
+    - endpoints: [SHIRE-PE-01:eth1, SHIRE-CG-NAT:eth2]
+    - endpoints: [SHIRE-PE-02:eth1, SHIRE-CG-NAT:eth3]
+    # CG-NAT Shelves
+    - endpoints: [MORDOR-EDGE-01:eth3, MORDOR-CG-NAT:eth1]
+    - endpoints: [MORDOR-PE-01:eth1, MORDOR-CG-NAT:eth2]
+    - endpoints: [MORDOR-PE-02:eth1, MORDOR-CG-NAT:eth3]
+    # PON Shelves
+    - endpoints: [MORDOR-PE-01:eth2, MORDOR-PON-01:eth1]
+    - endpoints: [MORDOR-PE-02:eth2, MORDOR-PON-01:eth2]
+    - endpoints: [ROHAN-PE-01:eth2, EREBOR-PON-01:eth1]
+    - endpoints: [GONDOR-PE-02:eth2, EREBOR-PON-01:eth2]
+    # Customer CPE nodes off MORDOR-PON-01
+    - endpoints: [MORDOR-PON-01:eth3, MORDOR-CPE-01:eth1]
+    - endpoints: [MORDOR-PON-01:eth4, MORDOR-CPE-02:eth1]
+    # Customer CPE nodes off EREBOR-PON-01
+    - endpoints: [EREBOR-PON-01:eth3, EREBOR-CPE-01:eth1]
+    - endpoints: [EREBOR-PON-01:eth4, EREBOR-CPE-02:eth1]
+    # Traffic generator — upstream of TRANSIT (simulates internet destinations)
+    - endpoints: [TRANSIT:eth4, TRAFFIC-GEN:eth1]

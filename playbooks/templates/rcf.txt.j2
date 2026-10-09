@@ -1,0 +1,54 @@
+function FILTER_INTERNET_IMPORTS() {
+    # Allow all Internet Routes to be imported from other PE routers
+    if (ext_community has_any {ROUTE-TARGET-AS:65000:30000}) {
+        return true;
+    }
+    # Allow all CGNAT VRF Prefixes to be imported.
+    if (ext_community has_any {ROUTE-TARGET-AS:65000:50000}) {
+        return true;
+    }
+    # Drop everything else
+    return false;
+}
+function FILTER_CGNAT_IMPORTS() {
+    # Allow all CGNAT VRF Routes to be imported from other PE routers
+    if (ext_community has_any {ROUTE-TARGET-AS:65000:50000}) {
+        return true;
+    }
+    # Allow an IPv6 default route into the CGNAT VRF.
+    if (evpn.ip_prefix_route.prefix is ::/0) {
+        return true;
+    }
+    # Drop everything else
+    return false;
+}
+
+
+
+function FILTER_WITHIN_THE_VRF() {
+   return prefix is 0.0.0.0/0;
+}
+
+
+function FILTER_IBGP_EVPN_TO_RR_CLIENTS() {
+    # If the internet VRF
+    if (ext_community has_any {ROUTE-TARGET-AS:65000:30000}) {
+        # Only allow a default route, v4
+        if (evpn.ip_prefix_route.prefix is 0.0.0.0/0) {
+            return true;
+        }
+        # Only allow a default route, v6
+        if (evpn.ip_prefix_route.prefix is ::/0) {
+            return true;
+        }
+        if (evpn.ip_prefix_route.prefix matches PROVIDER_IP_SPACE) {
+            return true;
+        }
+        # Drop the rest
+        return false;
+    }
+    # But if we're in any vrf NOT the internet - Allow routes
+    return true;
+}
+
+

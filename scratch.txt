@@ -1,0 +1,92 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Hub Router - Router ID: 172.16.0.1 (Whatever your loopback0 is)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+interface Ethernet1
+   description Hub Connection to All Customer Tags
+   no switchport
+!
+interface Ethernet1.10
+   description CustomerX on VLAN Tag 10
+   !
+   encapsulation vlan
+      client dot1q 10
+!
+interface Ethernet1.20
+   description CustomerY on VLAN Tag 20
+   !
+   encapsulation vlan
+      client dot1q 20
+!
+patch panel
+   patch CustomerX
+      connector 1 interface Ethernet1.10
+      connector 2 pseudowire bgp vpws CustomerX pseudowire CustomerX
+   !
+   patch CustomerY
+      connector 1 interface Ethernet1.20
+      connector 2 pseudowire bgp vpws CustomerY pseudowire CustomerY
+   !
+router bgp 65000
+   vpws CustomerX
+      rd 172.16.0.1:10
+      route-target import export evpn 65000:10
+      !
+      pseudowire CustomerX
+         evpn vpws id local 10010 remote 20010
+   !
+   vpws CustomerY
+      rd 172.16.0.1:20
+      route-target import export evpn 65000:20
+      !
+      pseudowire CustomerY
+         evpn vpws id local 10020 remote 20020
+   !
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Customer X Spoke Router - Router ID: 172.16.0.2 (Whatever your loopback0 is)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+interface Ethernet1.10
+   description CustomerX on VLAN Tag 10
+   !
+   encapsulation vlan
+      client dot1q 10
+!
+patch panel
+   patch CustomerX
+      connector 1 interface Ethernet1.10
+      connector 2 pseudowire bgp vpws CustomerX pseudowire CustomerX
+   !
+!
+router bgp 65000
+   vpws CustomerX
+      rd 172.16.0.2:10
+      route-target import export evpn 65000:10
+      !
+      pseudowire CustomerX
+         evpn vpws id local 20010 remote 10010
+   !
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Customer Y Spoke Router - Router ID: 172.16.0.3 (Whatever your loopback0 is)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+interface Ethernet1.20
+   description CustomerY on VLAN Tag 20
+   !
+   encapsulation vlan
+      client dot1q 20
+!
+patch panel
+   patch CustomerY
+      connector 1 interface Ethernet1.20
+      connector 2 pseudowire bgp vpws CustomerY pseudowire CustomerY
+   !
+!
+router bgp 65000
+   vpws CustomerY
+      rd 172.16.0.3:20
+      route-target import export evpn 65000:10
+      !
+      pseudowire CustomerY
+         evpn vpws id local 20020 remote 10020
+   !
+!

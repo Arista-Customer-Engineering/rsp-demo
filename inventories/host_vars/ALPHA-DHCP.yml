@@ -1,0 +1,59 @@
+# DHCP servers only utilize EOS-CLI to be configured, not AVD Designs
+hostname: ALPHA-DHCP
+
+management_interfaces:
+  - name: "Management0"
+    vrf: "OOB"
+    description: "OOB Management"
+    ip_address: "{{ ansible_host }}/24"
+    gateway: "192.168.128.254"
+
+ip_routing: true
+
+vrfs:
+  - name: "OOB"
+    description: "Out of Band"
+    ip_routing: false
+    ipv6_routing: false
+
+management_api_http:
+  enable_https: true
+  enable_vrfs:
+    - name: "OOB"
+
+ethernet_interfaces:
+  - name: "Ethernet1"
+    shutdown: false
+    ip_address: 192.168.100.10/24
+
+static_routes:
+  - vrf: "OOB"
+    destination_address_prefix: "0.0.0.0/0"
+    interface: "{{ lab_settings.mgmt_gateway }}"
+  - vrf: "default"
+    destination_address_prefix: "0.0.0.0/0"
+    interface: "192.168.100.1"
+
+eos_cli: |
+  interface Ethernet1
+   dhcp server ipv4
+  !
+  dhcp server
+   subnet 100.64.0.0/22
+      name PON-SHELF-Y-CUSTOMERS
+      range 100.64.0.10 100.64.3.254
+      dns server 8.8.8.8 1.1.1.1
+      lease time 0 days 1 hours 0 minutes
+      default-gateway 100.64.0.1
+   subnet 100.64.4.0/22
+      name PON-SHELF-Z-CUSTOMERS
+      range 100.64.4.10 100.64.7.254
+      dns server 8.8.8.8 1.1.1.1
+      lease time 0 days 1 hours 0 minutes
+      default-gateway 100.64.4.1
+   subnet 172.19.128.0/22
+      name VOICE-CUSTOMERS
+      range 172.19.128.10 172.19.131.254
+      dns server 8.8.8.8 1.1.1.1
+      lease time 0 days 1 hours 0 minutes
+      default-gateway 172.19.128.1

@@ -1,0 +1,331 @@
+{
+  "freeTextAnnotations": [],
+  "freeShapeAnnotations": [],
+  "trafficRateAnnotations": [],
+  "groupStyleAnnotations": [],
+  "networkNodeAnnotations": [],
+  "nodeAnnotations": [
+    {
+      "id": "ALPHA-EDGE-01",
+      "position": {
+        "x": -80,
+        "y": -260
+      }
+    },
+    {
+      "id": "BETA-EDGE-01",
+      "position": {
+        "x": 800,
+        "y": -240
+      }
+    },
+    {
+      "id": "ALPHA-PE-01",
+      "position": {
+        "x": -40,
+        "y": 0
+      }
+    },
+    {
+      "id": "ALPHA-PE-02",
+      "position": {
+        "x": 160,
+        "y": 0
+      }
+    },
+    {
+      "id": "ALPHA-PE-03",
+      "position": {
+        "x": 60,
+        "y": 100
+      }
+    },
+    {
+      "id": "BETA-PE-01",
+      "position": {
+        "x": 700,
+        "y": 0
+      }
+    },
+    {
+      "id": "BETA-PE-02",
+      "position": {
+        "x": 900,
+        "y": 0
+      }
+    },
+    {
+      "id": "DELTA-PE-01",
+      "position": {
+        "x": 160,
+        "y": 460
+      }
+    },
+    {
+      "id": "DELTA-PE-02",
+      "position": {
+        "x": -40,
+        "y": 460
+      }
+    },
+    {
+      "id": "GAMMA-PE-01",
+      "position": {
+        "x": 900,
+        "y": 460
+      }
+    },
+    {
+      "id": "GAMMA-PE-02",
+      "position": {
+        "x": 660,
+        "y": 460
+      }
+    },
+    {
+      "id": "THETA-PE-01",
+      "position": {
+        "x": 160,
+        "y": 660
+      }
+    },
+    {
+      "id": "THETA-PE-02",
+      "position": {
+        "x": -40,
+        "y": 660
+      }
+    },
+    {
+      "id": "ALPHA-DHCP",
+      "position": {
+        "x": 200,
+        "y": 100
+      }
+    },
+    {
+      "id": "ALPHA-CG-NAT",
+      "position": {
+        "x": 60,
+        "y": -100
+      }
+    },
+    {
+      "id": "BETA-CG-NAT",
+      "position": {
+        "x": 800,
+        "y": -100
+      }
+    },
+    {
+      "id": "TRANSIT",
+      "position": {
+        "x": 360,
+        "y": -420
+      }
+    },
+    {
+      "id": "ACME-BETA",
+      "position": {
+        "x": 1000,
+        "y": 140
+      }
+    },
+    {
+      "id": "ACME-GAMMA",
+      "position": {
+        "x": 1000,
+        "y": 580
+      }
+    },
+    {
+      "id": "BETA-PON-01",
+      "position": {
+        "x": 800,
+        "y": 100
+      }
+    },
+    {
+      "id": "OMNI-PON-01",
+      "position": {
+        "x": 420,
+        "y": 580
+      }
+    },
+    {
+      "id": "BETA-CPE-PUB",
+      "position": {
+        "x": 720,
+        "y": 120
+      }
+    },
+    {
+      "id": "BETA-CPE-NAT",
+      "position": {
+        "x": 880,
+        "y": 120
+      }
+    },
+    {
+      "id": "OMNI-CPE-PUB",
+      "position": {
+        "x": 280,
+        "y": 520
+      }
+    },
+    {
+      "id": "OMNI-CPE-NAT",
+      "position": {
+        "x": 440,
+        "y": 520
+      }
+    },
+    {
+      "id": "MNO-CSR",
+      "position": {
+        "x": 560,
+        "y": 120
+      }
+    },
+    {
+      "id": "MNO-AGG",
+      "position": {
+        "x": -360,
+        "y": 520
+      }
+    },
+    {
+      "id": "TRAFFIC-GEN",
+      "position": {
+        "x": 360,
+        "y": -540
+      }
+    },
+    {
+      "id": "OMNI-PON-01",
+      "position": {
+        "x": 360,
+        "y": 420
+      }
+    },
+    {
+      "id": "BETA-PON-01",
+      "position": {
+        "x": 800,
+        "y": 20
+      }
+    },
+    {
+      "id": "BETA-CG-NAT",
+      "position": {
+        "x": 800,
+        "y": -160
+      }
+    },
+    {
+      "id": "ALPHA-CG-NAT",
+      "position": {
+        "x": -80,
+        "y": -160
+      }
+    },
+    {
+      "id": "ALPHA-DHCP",
+      "position": {
+        "x": 40,
+        "y": 120
+      }
+    },
+    {
+      "id": "THETA-PE-02",
+      "position": {
+        "x": -460,
+        "y": 420
+      }
+    },
+    {
+      "id": "THETA-PE-01",
+      "position": {
+        "x": -260,
+        "y": 420
+      }
+    },
+    {
+      "id": "GAMMA-PE-02",
+      "position": {
+        "x": 660,
+        "y": 300
+      }
+    },
+    {
+      "id": "GAMMA-PE-01",
+      "position": {
+        "x": 920,
+        "y": 300
+      }
+    },
+    {
+      "id": "DELTA-PE-02",
+      "position": {
+        "x": -220,
+        "y": 300
+      }
+    },
+    {
+      "id": "DELTA-PE-01",
+      "position": {
+        "x": 40,
+        "y": 300
+      }
+    },
+    {
+      "id": "BETA-PE-02",
+      "position": {
+        "x": 920,
+        "y": -40
+      }
+    },
+    {
+      "id": "BETA-PE-01",
+      "position": {
+        "x": 660,
+        "y": -40
+      }
+    },
+    {
+      "id": "ALPHA-PE-03",
+      "position": {
+        "x": -80,
+        "y": 40
+      }
+    },
+    {
+      "id": "ALPHA-PE-02",
+      "position": {
+        "x": 40,
+        "y": -40
+      }
+    },
+    {
+      "id": "ALPHA-PE-01",
+      "position": {
+        "x": -220,
+        "y": -40
+      }
+    },
+    {
+      "id": "BETA-EDGE-01",
+      "position": {
+        "x": 800,
+        "y": -260
+      }
+    }
+  ],
+  "edgeAnnotations": [],
+  "aliasEndpointAnnotations": [],
+  "viewerSettings": {
+    "style": "default",
+    "linkLabelMode": "on-select",
+    "lastNonTelemetryLinkLabelMode": "on-select"
+  }
+}

@@ -1,0 +1,21 @@
+hostname: testhost
+service_routing_protocols_model: multi-agent
+vlan_internal_order:
+  allocation: ascending
+  range:
+    beginning: 1006
+    ending: 1199
+aaa_root:
+  disabled: true
+config_end: true
+enable_password:
+  disabled: true
+transceiver_qsfp_default_mode_4x10: true
+vrfs:
+  - name: MGMT
+    ip_routing: false
+ip_igmp_snooping:
+  globally_enabled: true
+metadata:
+  fabric_name: testgroup
+  is_deployed: true

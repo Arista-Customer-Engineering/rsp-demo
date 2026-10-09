@@ -1,0 +1,21 @@
+
+- name: Create Tech Library Full Configs Markdown File
+  hosts: localhost
+  gather_facts: false
+  tags: documentation
+  tasks:
+    - name: Create Tech Library Full Configs Markdown File
+      ansible.builtin.script: generate_tech_lib_full_configs.py
+      register: markdown
+      args:
+        executable: python3
+    - name: Create output file
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'PWD') }}/inventories/documentation/full_configs.md"
+        state: touch
+      delegate_to: localhost
+    - name: Write Markdown Contents
+      ansible.builtin.copy:
+        content: "{{markdown.stdout}}"
+        dest: "{{ lookup('env', 'PWD') }}/inventories/documentation/full_configs.md"
+      delegate_to: localhost

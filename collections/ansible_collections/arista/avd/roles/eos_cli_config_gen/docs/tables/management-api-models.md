@@ -1,0 +1,55 @@
+<!--
+  ~ Copyright (c) 2026 Arista Networks, Inc.
+  ~ Use of this source code is governed by the Apache License 2.0
+  ~ that can be found in the LICENSE file.
+  -->
+=== "Table"
+
+    | Variable | Type | Required | Default | Value Restrictions | Description |
+    | -------- | ---- | -------- | ------- | ------------------ | ----------- |
+    | [<samp>management_api_models</samp>](## "management_api_models") | Dictionary |  |  |  |  |
+    | [<samp>&nbsp;&nbsp;provider</samp>](## "management_api_models.provider") | Dictionary |  |  |  |  |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;sysdb</samp>](## "management_api_models.provider.sysdb") | Dictionary |  |  |  | Sysdb provider configuration. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disabled_paths</samp>](## "management_api_models.provider.sysdb.disabled_paths") | List, items: String |  |  | Min Length: 1 | List of disabled Sysdb paths for Octa. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&lt;str&gt;</samp>](## "management_api_models.provider.sysdb.disabled_paths.[]") | String |  |  |  |  |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;smash</samp>](## "management_api_models.provider.smash") | Dictionary |  |  |  | Smash provider configuration. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;paths</samp>](## "management_api_models.provider.smash.paths") | List, items: Dictionary |  |  |  | List of Smash paths. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;path</samp>](## "management_api_models.provider.smash.paths.[].path") | String | Required, Unique |  |  |  |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disabled</samp>](## "management_api_models.provider.smash.paths.[].disabled") | Boolean |  |  |  | Disabled Smash path for Octa. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;macsec</samp>](## "management_api_models.provider.macsec") | Dictionary |  |  |  | MACsec provider configuration. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces</samp>](## "management_api_models.provider.macsec.interfaces") | Boolean |  |  |  | Enable MACsec for interfaces. |
+    | [<samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mka</samp>](## "management_api_models.provider.macsec.mka") | Boolean |  |  |  | Enable MKA for MACsec. |
+    | [<samp>&nbsp;&nbsp;providers</samp>](## "management_api_models.providers") <span style="color:red">removed</span> | List |  |  |  | <span style="color:red">This key was removed. Support was removed in AVD version 6.0.0. Use <samp>provider</samp> instead.</span> |
+
+=== "YAML"
+
+    ```yaml
+    management_api_models:
+      provider:
+
+        # Sysdb provider configuration.
+        sysdb:
+
+          # List of disabled Sysdb paths for Octa.
+          disabled_paths: # >=1 items
+            - <str>
+
+        # Smash provider configuration.
+        smash:
+
+          # List of Smash paths.
+          paths:
+            - path: <str; required; unique>
+
+              # Disabled Smash path for Octa.
+              disabled: <bool>
+
+        # MACsec provider configuration.
+        macsec:
+
+          # Enable MACsec for interfaces.
+          interfaces: <bool>
+
+          # Enable MKA for MACsec.
+          mka: <bool>
+    ```

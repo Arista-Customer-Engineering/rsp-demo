@@ -1,0 +1,657 @@
+---
+# TRANSIT simulates three independent transit-carrier networks (Arelion,
+# Uniti, Segra) plus a set of downstream content-provider networks, all on
+# one cEOS box.
+#
+# Carrier VRFs (ARELION/UNITI/SEGRA) are fully meshed with each other over
+# the Ethernet5<->Ethernet6 loopback cable (see sp.clab.yml), carved into
+# three VLAN-tagged point-to-point links - one per carrier pair. Each VRF
+# runs eBGP with the other two carrier VRFs and with its uplink into the
+# SP fabric (Ethernet1/2/3, matching group_vars/services/services_internet.yml),
+# presenting its own simulated ASN via per-neighbor local_as.
+#
+# Content-provider VRFs (GOOGLE/CLOUDFLARE/NETFLIX/XBOX/ZOOM) attach to
+# TRAFFIC-GEN over Ethernet4 (one VLAN subinterface each, matching
+# traffic/tgen-startup.sh), and are genuinely eBGP-peered to their carrier
+# VRF(s) - real point-to-point links and neighbor sessions, not
+# route-target/L3VPN leaking. Each peering link reuses the same
+# Ethernet5<->Ethernet6 loopback cable as the carrier mesh above, on its
+# own VLAN (101-106) and /31 (10.98.10x.0/31), with the carrier side on
+# Ethernet5 and the content-provider side on Ethernet6:
+#   GOOGLE      -> ARELION                (deterministic single upstream)
+#   CLOUDFLARE  -> UNITI                  (deterministic single upstream)
+#   XBOX        -> SEGRA                  (deterministic single upstream)
+#   NETFLIX     -> ARELION, UNITI, SEGRA  (full-mesh multi-homed, like a
+#                  real large CDN)
+#   ZOOM        -> not peered - left as-is, not part of this exercise
+hostname: TRANSIT
+
+aaa_authentication:
+  login:
+    default: local
+    console: local
+aaa_authorization:
+  exec:
+    default: local
+
+ip_routing: true
+service_routing_protocols_model: multi-agent
+
+local_users:
+  - name: admin
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+  - name: dave.watkins
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+
+management_interfaces:
+  - name: Management0
+    description: OOB_MANAGEMENT
+    shutdown: false
+    vrf: OOB
+    ip_address: 192.168.128.220/24
+    type: oob
+    gateway: 192.168.128.254
+    eos_cli: |
+      no lldp transmit
+      no lldp receive
+
+management_api_http:
+  enable_https: true
+  enable_vrfs:
+    - name: OOB
+
+vrfs:
+  - name: OOB
+    ip_routing: false
+  # Transit carriers - fully meshed with each other, see router_bgp below.
+  - name: ARELION
+    description: "Arelion (AS1299)"
+    ip_routing: true
+  - name: UNITI
+    description: "Uniti Fiber (AS13760)"
+    ip_routing: true
+  - name: SEGRA
+    description: "Segra (AS2711)"
+    ip_routing: true
+  # Content providers - single-homed to one carrier each, see router_bgp below.
+  - name: GOOGLE
+    description: "Google (AS15169) - leaked into ARELION"
+    ip_routing: true
+  - name: CLOUDFLARE
+    description: "Cloudflare (AS13335) - leaked into UNITI"
+    ip_routing: true
+  - name: NETFLIX
+    description: "Netflix (AS2906) - leaked into SEGRA"
+    ip_routing: true
+  - name: XBOX
+    description: "Xbox Live - leaked into ARELION"
+    ip_routing: true
+  - name: ZOOM
+    description: "Zoom - leaked into UNITI"
+    ip_routing: true
+
+ethernet_interfaces:
+  # --- SP fabric uplinks, one per carrier (matches services_internet.yml) ---
+  - name: Ethernet1
+    description: "ALPHA-EDGE-01 Ethernet1 (Arelion uplink)"
+    shutdown: false
+    vrf: ARELION
+    ip_address: 198.51.100.0/31
+    ipv6_enable: true
+    ipv6_addresses:
+      - 2601::0/127
+    ipv6_nd:
+      ra:
+        disabled: true
+    switchport:
+      enabled: false
+  - name: Ethernet2
+    description: "ALPHA-EDGE-01 Ethernet2 (Uniti uplink)"
+    shutdown: false
+    vrf: UNITI
+    ip_address: 198.51.100.2/31
+    ipv6_enable: true
+    ipv6_addresses:
+      - 2602::0/127
+    ipv6_nd:
+      ra:
+        disabled: true
+    switchport:
+      enabled: false
+  - name: Ethernet3
+    description: "BETA-EDGE-01 Ethernet1 (Segra uplink)"
+    shutdown: false
+    vrf: SEGRA
+    ip_address: 198.51.100.4/31
+    ipv6_enable: true
+    ipv6_addresses:
+      - 2603::0/127
+    ipv6_nd:
+      ra:
+        disabled: true
+    switchport:
+      enabled: false
+
+  # --- TRAFFIC-GEN link - one subinterface per content provider ---
+  - name: Ethernet4
+    description: "TRAFFIC-GEN uplink"
+    shutdown: false
+    switchport:
+      enabled: false
+  - name: Ethernet4.100
+    description: "GOOGLE content peering"
+    shutdown: false
+    vrf: GOOGLE
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 100
+    ip_address: 10.255.0.6/31
+  - name: Ethernet4.200
+    description: "CLOUDFLARE content peering"
+    shutdown: false
+    vrf: CLOUDFLARE
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 200
+    ip_address: 10.255.0.8/31
+  - name: Ethernet4.300
+    description: "NETFLIX content peering"
+    shutdown: false
+    vrf: NETFLIX
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 300
+    ip_address: 10.255.0.10/31
+  - name: Ethernet4.400
+    description: "XBOX content peering"
+    shutdown: false
+    vrf: XBOX
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 400
+    ip_address: 10.255.0.12/31
+  - name: Ethernet4.500
+    description: "ZOOM content peering"
+    shutdown: false
+    vrf: ZOOM
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 500
+    ip_address: 10.255.0.14/31
+
+  # --- Carrier full-mesh over the Ethernet5<->Ethernet6 loopback cable ---
+  - name: Ethernet5
+    shutdown: false
+    switchport:
+      enabled: false
+  - name: Ethernet5.12
+    description: "Arelion-Uniti transit mesh"
+    shutdown: false
+    vrf: ARELION
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 12
+    ip_address: 10.99.12.0/31
+  - name: Ethernet5.13
+    description: "Arelion-Segra transit mesh"
+    shutdown: false
+    vrf: ARELION
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 13
+    ip_address: 10.99.13.0/31
+  - name: Ethernet5.23
+    description: "Uniti-Segra transit mesh"
+    shutdown: false
+    vrf: UNITI
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 23
+    ip_address: 10.99.23.0/31
+
+  # --- Content-provider peering, carrier side (see matching Ethernet6.1xx
+  #     subinterfaces below for the content-provider side of each link) ---
+  - name: Ethernet5.101
+    description: "Arelion-Google peering"
+    shutdown: false
+    vrf: ARELION
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 101
+    ip_address: 10.98.101.0/31
+  - name: Ethernet5.102
+    description: "Uniti-Cloudflare peering"
+    shutdown: false
+    vrf: UNITI
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 102
+    ip_address: 10.98.102.0/31
+  - name: Ethernet5.103
+    description: "Segra-Xbox peering"
+    shutdown: false
+    vrf: SEGRA
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 103
+    ip_address: 10.98.103.0/31
+  - name: Ethernet5.104
+    description: "Arelion-Netflix peering"
+    shutdown: false
+    vrf: ARELION
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 104
+    ip_address: 10.98.104.0/31
+  - name: Ethernet5.105
+    description: "Uniti-Netflix peering"
+    shutdown: false
+    vrf: UNITI
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 105
+    ip_address: 10.98.105.0/31
+  - name: Ethernet5.106
+    description: "Segra-Netflix peering"
+    shutdown: false
+    vrf: SEGRA
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 106
+    ip_address: 10.98.106.0/31
+
+  - name: Ethernet6
+    shutdown: false
+    switchport:
+      enabled: false
+  - name: Ethernet6.12
+    description: "Uniti-Arelion transit mesh"
+    shutdown: false
+    vrf: UNITI
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 12
+    ip_address: 10.99.12.1/31
+  - name: Ethernet6.13
+    description: "Segra-Arelion transit mesh"
+    shutdown: false
+    vrf: SEGRA
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 13
+    ip_address: 10.99.13.1/31
+  - name: Ethernet6.23
+    description: "Segra-Uniti transit mesh"
+    shutdown: false
+    vrf: SEGRA
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 23
+    ip_address: 10.99.23.1/31
+
+  # --- Content-provider peering, content-provider side ---
+  - name: Ethernet6.101
+    description: "Google-Arelion peering"
+    shutdown: false
+    vrf: GOOGLE
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 101
+    ip_address: 10.98.101.1/31
+  - name: Ethernet6.102
+    description: "Cloudflare-Uniti peering"
+    shutdown: false
+    vrf: CLOUDFLARE
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 102
+    ip_address: 10.98.102.1/31
+  - name: Ethernet6.103
+    description: "Xbox-Segra peering"
+    shutdown: false
+    vrf: XBOX
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 103
+    ip_address: 10.98.103.1/31
+  - name: Ethernet6.104
+    description: "Netflix-Arelion peering"
+    shutdown: false
+    vrf: NETFLIX
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 104
+    ip_address: 10.98.104.1/31
+  - name: Ethernet6.105
+    description: "Netflix-Uniti peering"
+    shutdown: false
+    vrf: NETFLIX
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 105
+    ip_address: 10.98.105.1/31
+  - name: Ethernet6.106
+    description: "Netflix-Segra peering"
+    shutdown: false
+    vrf: NETFLIX
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 106
+    ip_address: 10.98.106.1/31
+
+static_routes:
+  - vrf: OOB
+    prefix: 0.0.0.0/0
+    next_hop: 192.168.128.254
+  # Content-provider service IPs, via TRAFFIC-GEN's side of each Ethernet4 subinterface.
+  - vrf: GOOGLE
+    prefix: 8.8.8.8/32
+    next_hop: 10.255.0.7
+  - vrf: GOOGLE
+    prefix: 8.8.4.4/32
+    next_hop: 10.255.0.7
+  - vrf: GOOGLE
+    prefix: 142.250.0.1/32
+    next_hop: 10.255.0.7
+  - vrf: GOOGLE
+    prefix: 172.217.0.1/32
+    next_hop: 10.255.0.7
+  - vrf: CLOUDFLARE
+    prefix: 1.1.1.1/32
+    next_hop: 10.255.0.9
+  - vrf: CLOUDFLARE
+    prefix: 1.0.0.1/32
+    next_hop: 10.255.0.9
+  - vrf: CLOUDFLARE
+    prefix: 104.16.0.1/32
+    next_hop: 10.255.0.9
+  - vrf: NETFLIX
+    prefix: 45.57.0.1/32
+    next_hop: 10.255.0.11
+  - vrf: NETFLIX
+    prefix: 198.38.96.1/32
+    next_hop: 10.255.0.11
+  - vrf: NETFLIX
+    prefix: 23.246.0.1/32
+    next_hop: 10.255.0.11
+  - vrf: XBOX
+    prefix: 208.67.222.222/32
+    next_hop: 10.255.0.13
+  - vrf: ZOOM
+    prefix: 9.9.9.9/32
+    next_hop: 10.255.0.15
+
+router_bgp:
+  as: '65000'
+  router_id: 100.64.255.0
+  vrfs:
+    - name: ARELION
+      router_id: 100.64.255.1
+      redistribute:
+        connected:
+          enabled: true
+      neighbors:
+        - ip_address: 198.51.100.1
+          remote_as: '3791'
+          local_as: '1299'
+          description: "ALPHA-EDGE-01 (AS3791)"
+          shutdown: false
+        - ip_address: 2601::1
+          remote_as: '3791'
+          local_as: '1299'
+          description: "ALPHA-EDGE-01 (AS3791) IPv6"
+          shutdown: false
+        - ip_address: 10.99.12.1
+          remote_as: '13760'
+          local_as: '1299'
+          description: "UNITI (AS13760) transit mesh"
+          shutdown: false
+        - ip_address: 10.99.13.1
+          remote_as: '2711'
+          local_as: '1299'
+          description: "SEGRA (AS2711) transit mesh"
+          shutdown: false
+        - ip_address: 10.98.101.1
+          remote_as: '15169'
+          local_as: '1299'
+          description: "GOOGLE (AS15169) content peering"
+          shutdown: false
+        - ip_address: 10.98.104.1
+          remote_as: '2906'
+          local_as: '1299'
+          description: "NETFLIX (AS2906) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 198.51.100.1
+            activate: true
+          - ip_address: 10.99.12.1
+            activate: true
+          - ip_address: 10.99.13.1
+            activate: true
+          - ip_address: 10.98.101.1
+            activate: true
+          - ip_address: 10.98.104.1
+            activate: true
+      address_family_ipv6:
+        neighbors:
+          - ip_address: 2601::1
+            activate: true
+    - name: UNITI
+      router_id: 100.64.255.2
+      redistribute:
+        connected:
+          enabled: true
+      neighbors:
+        - ip_address: 198.51.100.3
+          remote_as: '3791'
+          local_as: '13760'
+          description: "ALPHA-EDGE-01 (AS3791)"
+          shutdown: false
+        - ip_address: 2602::1
+          remote_as: '3791'
+          local_as: '13760'
+          description: "ALPHA-EDGE-01 (AS3791) IPv6"
+          shutdown: false
+        - ip_address: 10.99.12.0
+          remote_as: '1299'
+          local_as: '13760'
+          description: "ARELION (AS1299) transit mesh"
+          shutdown: false
+        - ip_address: 10.99.23.1
+          remote_as: '2711'
+          local_as: '13760'
+          description: "SEGRA (AS2711) transit mesh"
+          shutdown: false
+        - ip_address: 10.98.102.1
+          remote_as: '13335'
+          local_as: '13760'
+          description: "CLOUDFLARE (AS13335) content peering"
+          shutdown: false
+        - ip_address: 10.98.105.1
+          remote_as: '2906'
+          local_as: '13760'
+          description: "NETFLIX (AS2906) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 198.51.100.3
+            activate: true
+          - ip_address: 10.99.12.0
+            activate: true
+          - ip_address: 10.99.23.1
+            activate: true
+          - ip_address: 10.98.102.1
+            activate: true
+          - ip_address: 10.98.105.1
+            activate: true
+      address_family_ipv6:
+        neighbors:
+          - ip_address: 2602::1
+            activate: true
+    - name: SEGRA
+      router_id: 100.64.255.3
+      redistribute:
+        connected:
+          enabled: true
+      neighbors:
+        - ip_address: 198.51.100.5
+          remote_as: '3791'
+          local_as: '2711'
+          description: "BETA-EDGE-01 (AS3791)"
+          shutdown: false
+        - ip_address: 2603::1
+          remote_as: '3791'
+          local_as: '2711'
+          description: "BETA-EDGE-01 (AS3791) IPv6"
+          shutdown: false
+        - ip_address: 10.99.13.0
+          remote_as: '1299'
+          local_as: '2711'
+          description: "ARELION (AS1299) transit mesh"
+          shutdown: false
+        - ip_address: 10.99.23.0
+          remote_as: '13760'
+          local_as: '2711'
+          description: "UNITI (AS13760) transit mesh"
+          shutdown: false
+        - ip_address: 10.98.103.1
+          remote_as: '8075'
+          local_as: '2711'
+          description: "XBOX (AS8075) content peering"
+          shutdown: false
+        - ip_address: 10.98.106.1
+          remote_as: '2906'
+          local_as: '2711'
+          description: "NETFLIX (AS2906) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 198.51.100.5
+            activate: true
+          - ip_address: 10.99.13.0
+            activate: true
+          - ip_address: 10.99.23.0
+            activate: true
+          - ip_address: 10.98.103.1
+            activate: true
+          - ip_address: 10.98.106.1
+            activate: true
+      address_family_ipv6:
+        neighbors:
+          - ip_address: 2603::1
+            activate: true
+    # --- Content providers: real eBGP peering to their carrier(s) over
+    #     the Ethernet5<->Ethernet6 loopback cable (same trick used for the
+    #     carrier mesh above), not route-target/L3VPN leaking. GOOGLE,
+    #     CLOUDFLARE, and XBOX are single-homed to one carrier each
+    #     (deterministic outbound path); NETFLIX is multi-homed to all
+    #     three (full-mesh, like a real large CDN). ZOOM is intentionally
+    #     not peered - not part of this exercise. ---
+    - name: GOOGLE
+      neighbors:
+        - ip_address: 10.98.101.0
+          remote_as: '1299'
+          local_as: '15169'
+          description: "ARELION (AS1299) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 10.98.101.0
+            activate: true
+      redistribute:
+        static:
+          enabled: true
+    - name: CLOUDFLARE
+      neighbors:
+        - ip_address: 10.98.102.0
+          remote_as: '13760'
+          local_as: '13335'
+          description: "UNITI (AS13760) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 10.98.102.0
+            activate: true
+      redistribute:
+        static:
+          enabled: true
+    - name: NETFLIX
+      neighbors:
+        - ip_address: 10.98.104.0
+          remote_as: '1299'
+          local_as: '2906'
+          description: "ARELION (AS1299) content peering"
+          shutdown: false
+        - ip_address: 10.98.105.0
+          remote_as: '13760'
+          local_as: '2906'
+          description: "UNITI (AS13760) content peering"
+          shutdown: false
+        - ip_address: 10.98.106.0
+          remote_as: '2711'
+          local_as: '2906'
+          description: "SEGRA (AS2711) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 10.98.104.0
+            activate: true
+          - ip_address: 10.98.105.0
+            activate: true
+          - ip_address: 10.98.106.0
+            activate: true
+      redistribute:
+        static:
+          enabled: true
+    - name: XBOX
+      neighbors:
+        - ip_address: 10.98.103.0
+          remote_as: '2711'
+          local_as: '8075'
+          description: "SEGRA (AS2711) content peering"
+          shutdown: false
+      address_family_ipv4:
+        neighbors:
+          - ip_address: 10.98.103.0
+            activate: true
+      redistribute:
+        static:
+          enabled: true
+    - name: ZOOM
+      rd: "100.64.255.0:500"
+      route_targets:
+        export:
+          - address_family: vpn-ipv4
+            route_targets:
+              - "65000:500"
+      redistribute:
+        static:
+          enabled: true

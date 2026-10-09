@@ -1,0 +1,129 @@
+# PON Shelf simulation node which provides access to the CPE Mock Devices
+#
+# Each simulation PON shelf has the following features:
+#  - A Port-Channel back to an EVPN A/A pair of Arista PE interfaces with PON service trunks
+#  - Many access ports downstream to a Mock CE, with an access service per CE link (DATA or VOICE)
+#  - A virtual interface used for PON-MGMT VRF on the service provider side
+#
+hostname: BETA-PON-01
+
+local_users:
+  - name: admin
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+  - name: dave.watkins
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+
+management_interfaces:
+  - name: "Management0"
+    vrf: "OOB"
+    description: "OOB Management"
+    ip_address: "{{ ansible_host }}/24"
+    gateway: "192.168.128.254"
+
+vlans:
+  - id: "1001"
+    name: "PUBLIC_DATA"
+    state: "active"
+  - id: "1002"
+    name: "CGNAT_DATA"
+    state: "active"
+  - id: "1003"
+    name: "MGMT"
+    state: "active"
+
+ip_routing: true
+
+vrfs:
+  - name: "OOB"
+    description: "Out of Band"
+    ip_routing: false
+    ipv6_routing: false
+  - name: "DATA"
+    description: "Customer CPE Data"
+    ip_routing: true
+    ipv6_routing: true
+  - name: "VOICE"
+    description: "Customer CPE Voice"
+    ip_routing: true
+    ipv6_routing: true
+  - name: "PON_MGMT"
+    description: "PON Shelf Management"
+    ip_routing: true
+    ipv6_routing: true
+
+management_api_http:
+  enable_https: true
+  enable_vrfs:
+    - name: "OOB"
+
+ethernet_interfaces:
+  - name: "Ethernet1"
+    shutdown: false
+    description: "BETA-PE-01 Uplink"
+    channel_group:
+      id: 1
+      mode: "active"
+  - name: "Ethernet2"
+    description: "BETA-PE-02 Uplink"
+    shutdown: false
+    channel_group:
+      id: 1
+      mode: "active"
+  - name: "Ethernet3"
+    description: "PUBLIC-CUSTOMER"
+    shutdown: false
+    switchport:
+      enabled: true
+      mode: "access"
+      access_vlan: 1001
+  - name: "Ethernet4"
+    description: "CGNAT-CUSTOMER"
+    shutdown: false
+    switchport:
+      enabled: true
+      mode: "access"
+      access_vlan: 1002
+  - name: "Port-Channel1"
+    description: "PON SHELF EVPN A/A UPLINK"
+    shutdown: false
+    switchport:
+      enabled: false
+  - name: "Port-Channel1.1001"
+    description: "CPE PUBLIC"
+    vlan_id: 1001
+    encapsulation_vlan:
+      client:
+        encapsulation: "dot1q"
+        vlan: 1001
+  - name: "Port-Channel1.1002"
+    description: "CPE CGNAT"
+    vlan_id: 1002
+    encapsulation_vlan:
+      client:
+        encapsulation: "dot1q"
+        vlan: 1002
+  - name: "Port-Channel1.1003"
+    description: "PON Management"
+    vlan_id: 1003
+    encapsulation_vlan:
+      client:
+        encapsulation: "dot1q"
+        vlan: 1003
+
+vlan_interfaces:
+  - name: "vlan1003"
+    shutdown: false
+    vrf: "PON_MGMT"
+    ip_address: "172.31.255.1/24"
+
+static_routes:
+  - vrf: "OOB"
+    prefix: "0.0.0.0/0"
+    interface: "{{ lab_settings.mgmt_gateway }}"
+  - vrf: "PON_MGMT"
+    prefix: "0.0.0.0/0"
+    interface: "172.31.255.254"

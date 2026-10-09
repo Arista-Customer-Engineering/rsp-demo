@@ -1,0 +1,10 @@
+- name: Disable LLDP on Management0
+  hosts: mpls
+  gather_facts: false
+  tasks:
+    - name: Push LLDP disable config on Management0
+      arista.eos.eos_config:
+        lines:
+          - no lldp transmit
+          - no lldp receive
+        parents: interface Management0

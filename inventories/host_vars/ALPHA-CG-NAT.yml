@@ -1,0 +1,132 @@
+---
+# ALPHA-CG-NAT is the CG-NAT appliance for the Alpha POP - a dual-arm BGP
+# speaker between ALPHA-EDGE-01's INTERNET and CGNAT vrfs (see
+# group_vars/services/services_internet.yml and services_cg_nat.yml,
+# CGNAT_APPLIANCE_* bgp_peer_groups/bgp_peers - the addressing here must
+# match what's defined there). Built as raw host_vars like TRANSIT.yml,
+# not via eos_designs.
+#
+# Deliberately no INTERNET/CGNAT vrf split on this box itself (unlike
+# ALPHA-EDGE-01, which keeps them separate) - both peering sessions below
+# live in the default vrf, so a route learned on one automatically
+# routes out the other with no NAT/leak/internal-peering machinery
+# needed. Simple "direct route" simulation, not a real CG-NAT translation
+# device - see TODO(cgnat-toggle) in the Makefile.
+#
+#   CGNAT-side session (Ethernet1.20, facing ALPHA-EDGE-01):
+#     originates a default route toward the subscriber-facing fabric.
+#   INTERNET-side session (Ethernet1.10, facing ALPHA-EDGE-01):
+#     advertises the 100.64.0.0/16 subscriber summary out toward transit.
+#
+# Ethernet2/Ethernet3 are wired to ALPHA-PE-01/ALPHA-PE-02 in sp.clab.yml
+# but have no defined role yet - left shut down. TODO: decide whether
+# these are a redundant/HA path or something else before using them.
+hostname: ALPHA-CG-NAT
+
+aaa_authentication:
+  login:
+    default: local
+    console: local
+aaa_authorization:
+  exec:
+    default: local
+
+ip_routing: true
+service_routing_protocols_model: multi-agent
+
+local_users:
+  - name: admin
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+  - name: dave.watkins
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$n5UzLR7bucITZ.fE$BoS3AU71MBIDlSsWb1NpH0P62l9AyanxImmA.9OKesBuClBXXae3oMf0fm1HA.3rxwzvbkbVl.QarZAHgm7V81
+
+management_interfaces:
+  - name: Management0
+    description: OOB_MANAGEMENT
+    shutdown: false
+    vrf: OOB
+    ip_address: 192.168.128.210/24
+    type: oob
+    gateway: 192.168.128.254
+    eos_cli: |
+      no lldp transmit
+      no lldp receive
+
+management_api_http:
+  enable_https: true
+  enable_vrfs:
+    - name: OOB
+
+vrfs:
+  - name: OOB
+    ip_routing: false
+
+ethernet_interfaces:
+  - name: Ethernet1
+    description: "ALPHA-EDGE-01 Ethernet3 (INTERNET+CGNAT trunk)"
+    shutdown: false
+    switchport:
+      enabled: false
+  - name: Ethernet1.10
+    description: "INTERNET peering to ALPHA-EDGE-01"
+    shutdown: false
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 10
+    ip_address: 198.51.100.6/31
+  - name: Ethernet1.20
+    description: "CGNAT peering to ALPHA-EDGE-01"
+    shutdown: false
+    encapsulation_vlan:
+      client:
+        encapsulation: dot1q
+        vlan: 20
+    ip_address: 198.51.100.14/31
+  # Wired to ALPHA-PE-01/ALPHA-PE-02 in sp.clab.yml - role not yet defined.
+  - name: Ethernet2
+    description: "ALPHA-PE-01 - reserved, not yet in use"
+    shutdown: true
+    switchport:
+      enabled: false
+  - name: Ethernet3
+    description: "ALPHA-PE-02 - reserved, not yet in use"
+    shutdown: true
+    switchport:
+      enabled: false
+
+static_routes:
+  - vrf: OOB
+    prefix: 0.0.0.0/0
+    next_hop: 192.168.128.254
+  - prefix: 100.64.0.0/16
+    interface: null0
+
+router_bgp:
+  as: '65100'
+  router_id: 198.51.100.6
+  neighbors:
+    - ip_address: 198.51.100.7
+      remote_as: '3791'
+      description: "ALPHA-EDGE-01 INTERNET vrf"
+      shutdown: false
+    - ip_address: 198.51.100.15
+      remote_as: '64496'
+      description: "ALPHA-EDGE-01 CGNAT vrf"
+      shutdown: false
+      default_originate:
+        enabled: true
+        always: true
+  redistribute:
+    static:
+      enabled: true
+  address_family_ipv4:
+    neighbors:
+      - ip_address: 198.51.100.7
+        activate: true
+      - ip_address: 198.51.100.15
+        activate: true

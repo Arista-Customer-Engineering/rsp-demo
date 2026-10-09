@@ -1,0 +1,18 @@
+{# MPLS Loopbacks #}
+monitor_connectivity:
+  shutdown: false
+  interval: 1
+  interface_sets:
+    - name: "Underlay"
+      interfaces: "Loopback0"
+  hosts:
+{% for group in pe["node_groups"] %}
+{%  for node in group["nodes"] %}
+{%    if inventory_hostname != node["name"]%}
+    - name: {{ node["name"] }}
+      ip: 172.16.0.{{ node["id"] }}
+      icmp_echo_size: 7000
+      local_interfaces: "Underlay"
+{%    endif %}
+{%  endfor %}
+{% endfor %}
